@@ -36,9 +36,14 @@ def createUser(username, password, email):
             return True
     return False
 
-def get_user_id(username: str):
+def get_user_id_by_username(username: str) -> int:
     with Session(engine) as session:
-        return session.execute(select(User.user_id).where(User.username==username)).all()
+        user = session.query(User).filter(User.username == username).first()
+        if user:
+            print("found")
+            return user.user_id
+        else:
+            raise ValueError("User not found")
 
 def change_username(old_username:str, new_username: str):
     with Session(engine) as session:
@@ -50,11 +55,11 @@ def change_username(old_username:str, new_username: str):
             return True
         return False
 
-def get_password(username: str):
+def get_user_password(username: str):
     with Session(engine) as session:
         return session.execute(select(User.password).where(User.username==username)).all()
     
-def get_pfp(username: str):
+def get_user_pfp(username: str):
     with Session(engine) as session:
         return session.execute(select(User.pfp_path).where(User.username==username)).all()
 
@@ -63,7 +68,7 @@ def set_pfp(username: str, pfp_path: str):
         session.execute(update(User).where(User.username == username).values(pfp_path = pfp_path))
         session.commit()
 
-def get_bio(username:str):
+def get_user_bio(username:str):
     with Session(engine) as session:
         return session.execute(select(User.bio).where(User.username==username)).all()
     

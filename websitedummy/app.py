@@ -8,6 +8,7 @@ from playlist import *
 
 from flask import Flask, render_template, request, abort, url_for
 from flask_socketio import SocketIO
+import json
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import secrets
@@ -35,14 +36,18 @@ def login_user():
         abort(404)
     name = data.get('name')
     password = data.get('password')
-    user_password = get_password(name)
+    user_password = get_user_password(name)[0][0]
     print(user_password)
-    if password != userpassword:
+    if password != user_password:
         redirect_url = "http://localhost:3000/login"
         return jsonify({"redirect_url": redirect_url})
     else:
-        redirect_url = "http://localhost:3000/" #home?name={name}
-        return jsonify({"user": name, "redirect_url": redirect_url})
+        print("logged_in")
+        user_id = get_user_id_by_username(name)
+        print(user_id)
+        return jsonify({"user": name, "id": user_id})
+
+@app.route("/main")
 
 # handles a post request when the user clicks the signup button
 @app.route("/signup", methods=['GET'])
@@ -71,33 +76,90 @@ def display_account():
     print("account")
     data=request.json
     name=data.get('name')
-    bio=get_bio(name)
-    pfp_path=get_pfp(name)
-    fav_artist=get_fav_artist(name)
-    friends = len(get_friendship(name))
-    following=len(get_user_following(name))
+    user_id = data.get('id')
+    bio=get_user_bio(name)[0][0]
+    pfp_path=get_user_pfp(name)[0][0]
+    fav_artist=get_fav_artist(name)[0][0]
+    try:
+        friends = len(get_friendship(name))
+    except:
+        friends=0
+    try:
+        following=len(get_user_following(name))
+    except:
+        following=0
     insta_link=get_insta_link(name)
     spotify_link=get_spotify_link(name)
     apple_music_link=get_apple_music_link(name)
     soundcloud_link=get_soundcloud_link(name)
-    playlists=get_playlist_id(get_user_id(name))
-    playlist_name = []
-    playlist_pics = []
+    playlists=get_playlist_id(user_id)
+    playlists_data=[]
     for playlist in playlists:
-        playlist_pics.append(get_playlist_pic_path(playlist))
-        playlist_name.append(get_playlist_name)
-    return jsonify({"bio": bio, "pfp_path": pfp_path, "fav_artist": fav_artist, "friend_amount": friends, "following_amount": following, "insta_link": insta_link, 
-                    "spotify_link": spotify_link, "apple_music_link": apple_music_link, "soundcloud_link":soundcloud_link, "playlist_name":playlist_name, "playlist_pics": playlist_pics})
+        playlist_data = []
+        playlist_data['name'] = get_playlist_name(playlist)
+        playlist_data['pic'] = get_playlist_pic_path(playlist)
+        playlists_data.append(playlist_data)
+    
+    #print(bio, pfp_path, fav_artist, friends, following, insta_link, spotify_link, apple_music_link, soundcloud_link, playlists_data)
+    #return jsonify({"bio": bio, "fav_artist": fav_artist})
+
+    return jsonify({"bio": bio, "pfp_path": pfp_path, "fav_artist": fav_artist, "friend_amount": friends, "following_amount": following, "insta_link": insta_link, "spotify_link": spotify_link, "apple_music_link": apple_music_link, "soundcloud_link":soundcloud_link})
 
 #@app.route("/account/edit", methods=["POST"])
 
 @app.route("/artist", methods=["POST"])
 def display_artist():
-    data=request.json
-    name=data.get('name')
-    result_type=data.get('type')
-    search_name=data.get('search')
-    if retult_type=
-    redirect_url = f
+    artist_name = request.json.get("artist")
+    artist_id = get_artist_id(artist_name)
+    bio = get_bio(artist_id)
+    pfp = get_pfp_path(artist_id)
+    insta = get_insta_link(artist_id)
+    spotify = get_spotify_link(artist_id)
+    apple = get_apple_music_link(artist_id)
+    soundcloud = get_soundcloud_link(artist_id)
+    song_ids = get_artists_songs(artist_id)
+    songs = []
+    albums = []
+    EPs = []
+    for music in song_ids:
+        song = {}
+        song["id"] = music
+        song["name"] = get_name(music)
+        song["pic"] = get_song_pic(music)
+        song["date"] = get_release_date(get_release_id(music))
+        songs.append(song)
+
+    release_ids = get_artists_releasess(artist_id)
+    for music in release_ids:
+        if get_is_album(music):
+            album = {}
+            album["name"] = get_release_name(music)
+            album["pic"] = get_release_pic(music)
+            album["date"] = get_release_date(music)
+            albums.append(album)
+        elif get_is_EP(music):
+            EP_a = {}
+            EP_a["name"] = get_release_name(music)
+            EP_a["pic"] = get_release_pic(music)
+            EP_a["date"] = get_release_date(music)
+            EPs.append[EP_a]
+        
+    
+    return jsonify({"bio": bio, "pfp_path": pfp, "insta_link": insta, "spotify_link": spotify, "apple_music_link": apple, "soundcloud_link":soundcloud, "albums": albums, "songs": songs, "EPs": EPs})
+
+#search function
+@app.route("/search", methods=["POST"])
+def search():
+    search_query = request.json.get("search")
+    songs = 
+
+    users = 
+
+    releases = 
+
+    playlists = 
+
+    return jsonify({"songs": songs, "users": users, "releases": releases, "playlists": playlists})
+
 if __name__ == '__main__':
     app.run(debug=True)

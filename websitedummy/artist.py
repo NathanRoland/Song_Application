@@ -22,6 +22,10 @@ def create_artist(username, password, bio, pfp_path, insta_link, spotify_link, a
         session.add(artist)
         session.commit()
 
+def get_artist_id(username: str):
+    with Session(engine) as session:
+        return session.execute(select(Artist.user_id).where(Artist.username==username)).all()
+
 def get_username(user_id: int):
     with Session(engine) as session:
         return session.execute(select(Artist.username).where(Artist.user_id == user_id)).all()

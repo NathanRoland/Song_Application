@@ -2,11 +2,10 @@ import { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "./userContext";
-
 function Login() {
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
-  const { setUser } = useUser();
+  const { user, setUser } = useUser();
   const navigate = useNavigate();
 
   const sendDataToFlask = async () => {
@@ -19,10 +18,13 @@ function Login() {
       //navigate("/new-page")
 
       if (response.data.user){
-        setUser(response.data.user)
+        const newUser = { name: response.data.user,
+          id: response.data.id };
+
+        setUser(newUser);
+        navigate("/account")
       }
-      console.log(response.data)
-      window.location.href = response.data.redirect_url;
+      
     } catch (error) {
       console.error("Error sending data:", error);
     }
@@ -43,6 +45,7 @@ function Login() {
         value={password}
         onChange={(e) => setPassword(e.target.value)}
       />
+      
       <button onClick={sendDataToFlask}>Submit</button>
 
     </div>

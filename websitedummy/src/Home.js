@@ -1,11 +1,22 @@
 import { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { useUser } from "./userContext";
+
 
 function Home() {
   const [name, setName] = useState("");
   const [age, setAge] = useState("");
   const navigate = useNavigate();
+  const { user } = useUser();  // Get user data from Context
+    
+    if (!user) {
+      console.log("no data found")
+    }
+    else{
+      console.log(user)
+      console.log(user.name)
+    }
 
   const sendDataToFlask = async () => {
     try {
