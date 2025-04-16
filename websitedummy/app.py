@@ -111,7 +111,7 @@ def display_account():
 
 @app.route("/artist", methods=["POST"])
 def display_artist():
-    artist_name = request.json.get("artist")
+    artist_name = request.args.get("artist")
     artist_id = get_artist_id(artist_name)
     bio = get_bio(artist_id)
     pfp = get_pfp_path(artist_id)
@@ -145,8 +145,6 @@ def display_artist():
             EP_a["pic"] = get_release_pic(music)
             EP_a["date"] = get_release_date(music)
             EPs.append[EP_a]
-        
-    
     return jsonify({"bio": bio, "pfp_path": pfp, "insta_link": insta, "spotify_link": spotify, "apple_music_link": apple, "soundcloud_link":soundcloud, "albums": albums, "songs": songs, "EPs": EPs})
 
 #search function
@@ -200,7 +198,31 @@ def getResult():
     
 @app.route("/user")
 def display_user():
-    return
+    username = request.args.get("user")
+    user_id = get_user_id_by_username(username)
+    bio=get_user_bio(username)[0][0]
+    pfp_path=get_user_pfp(username)[0][0]
+    fav_artist=get_fav_artist(username)[0][0]
+    try:
+        friends = len(get_friendship(username))
+    except:
+        friends=0
+    try:
+        following=len(get_user_following(username))
+    except:
+        following=0
+    insta_link=get_insta_link(username)
+    spotify_link=get_spotify_link(username)
+    apple_music_link=get_apple_music_link(username)
+    soundcloud_link=get_soundcloud_link(username)
+    playlists=get_playlist_id(user_id)
+    playlists_data=[]
+    for playlist in playlists:
+        playlist_data = []
+        playlist_data['name'] = get_playlist_name(playlist)
+        playlist_data['pic'] = get_playlist_pic_path(playlist)
+        playlists_data.append(playlist_data)
+    return jsonify({"bio": bio, "pfp_path": pfp_path, "fav_artist": fav_artist, "friend_amount": friends, "following_amount": following, "insta_link": insta_link, "spotify_link": spotify_link, "apple_music_link": apple_music_link, "soundcloud_link":soundcloud_link})
 
 @app.route("/user")
 def display_user():

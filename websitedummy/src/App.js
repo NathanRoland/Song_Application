@@ -4,6 +4,7 @@ import Signup from "./Signup";
 import Login from "./Login";
 import Account from "./Account";
 import Search from "./Search";
+import User from "./User";
 import { UserProvider } from "./userContext";
 
 
@@ -17,6 +18,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/account" element={<Account />} />
           <Route path="/search" element={<Search />} />
+          <Route path="/user" element={<User />} />
         </Routes>
       </UserProvider>
     </Router>

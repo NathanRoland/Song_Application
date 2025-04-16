@@ -46,7 +46,7 @@ function Search() {
       console.log(user.name)
     }
 
-  const sendDataToFlask = async () => {
+  const fetchData = async () => {
     try {
       const response = await axios.post("http://127.0.0.1:5000/search", {
         search: search,
