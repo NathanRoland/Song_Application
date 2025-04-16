@@ -29,6 +29,10 @@ def del_playlist(playlist_id: int):
         session.execute(delete(PlaylistSongs).where(PlaylistSongs.playlist_id == playlist_id))
         session.commit()
 
+def searchForLikePlaylists(search):
+    with Session(engine) as session:
+        return session.execute(select(Playlist.playlist_id, Playlist.name).where(Playlist.name.like(search))).all()
+
 
 def get_playlist_id(user_id:int, name:str):
     with Session(engine) as session:

@@ -24,6 +24,10 @@ def createSong(name, artist_id, release_date, time, unreleased, apl_plays, spt_p
         session.add(song)
         session.commit()
 
+def searchForLikeSongs(search):
+    with Session(engine) as session:
+        return session.execute(select(Song.song_id, Song.name).where(Song.name.like(search))).all()
+
 def get_artists_songs(artist_id: int):
     with Session(engine) as session:
         return session.execute(select(Song.song_id).where(Song.artist_id== artist_id)).all()
@@ -130,9 +134,13 @@ def create_release(name, artist_id, release_date, time, unreleased, is_album, is
         session.add(release)
         session.commit()
 
+def searchForLikeReleases(search):
+    with Session(engine) as session:
+        return session.execute(select(Release.release_id, Release.name).where(Release.name.like(search))).all()
+
 def get_artists_releasess(artist_id: int):
     with Session(engine) as session:
-        return session.execute(select(Release.song_id).where(Release.artist_id== artist_id)).all()
+        return session.execute(select(Release.release_id).where(Release.artist_id== artist_id)).all()
 
 def get_release_name(release_id: int):
     with Session(engine) as session:

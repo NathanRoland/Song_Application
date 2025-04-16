@@ -64,9 +64,11 @@ def signup_user():
     email = data.get('email')
     
     if get_user(name) is None:
+        print(name)
         createUser(name, password, email)
-        redirect_url = "http://localhost:3000/"
-        return jsonify({"user": name, "redirect_url": redirect_url})
+        user_id = get_user_id_by_username(name)
+        print(user_id)
+        return jsonify({"user": name, "id": user_id})
     else:
         redirect_url = "http://localhost:3000/signup"
         return jsonify({"redirect_url": redirect_url})
@@ -151,15 +153,69 @@ def display_artist():
 @app.route("/search", methods=["POST"])
 def search():
     search_query = request.json.get("search")
-    songs = 
+    print(search_query)
+    songs = searchForLikeSongs(search_query)
+    #songs = list
+    artists = searchForLikeArtists(search_query)
+    users = searchForLikeUsers(search_query)
+    releases = searchForLikeReleases(search_query)
+    playlists = searchForLikePlaylists(search_query)
+    if len(songs) != 0:
+        songs = [{'key':x[0], 'name':x[1]}for x in songs[0]]
+    if len(artists) != 0:
+        artists = [{'key':x[0], 'name':x[1]}for x in artists[0]]
+    if len(users) != 0:
+        print([x[0] for x in users])
+        users = [{'key':x[0], 'name':x[1]} for x in users]
+    if len(releases) != 0:
+        releases = [{'key':x[0], 'name':x[1]}for x in releases[0]]
+    if len(playlists) != 0:
+        playlists = [{'key':x[0], 'name':x[1]}for x in playlists[0]]
+    print(songs)
+    print(artists)
+    print(users)
+    print(releases)
+    print(playlists)
+    return jsonify({"songs": songs, "users": users, "artists": artists, "releases": releases, "playlists": playlists})
 
-    users = 
+@app.route("/search/result", methods=["POST"])
+def getResult():
+    url = None
+    data=request.json
+    print("recieved:data", data)
+    result = data.get("result")
+    type = data.get("type")
+    id = data.get("id")
+    print("proof")
+    if type == "Artist":
+        return url_for('display_artist', artist=result)
+    if type == "Song":
+        return url_for('display_song', song=result)
+    if type == "User":
+        return url_for('display_user', user=result)
+    if type == "Release":
+        return url_for('display_release', release=result)
+    if type == "Playlist":
+        return url_for('display_playlist', playlist=result)
+    
+@app.route("/user")
+def display_user():
+    return
 
-    releases = 
+@app.route("/user")
+def display_user():
+    return
 
-    playlists = 
+@app.route("/user")
+def display_user():
+    return
 
-    return jsonify({"songs": songs, "users": users, "releases": releases, "playlists": playlists})
+@app.route("/user")
+def display_user():
+    return
 
+@app.route("/user")
+def display_user():
+    return
 if __name__ == '__main__':
     app.run(debug=True)

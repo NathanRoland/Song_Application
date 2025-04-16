@@ -1,10 +1,11 @@
 import { useUser } from "./userContext";
+
 import { useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
 function Account() {
-  const { user, updateUser } = useUser();  // Get user data from Context
+  const { user, setUser } = useUser();  // Get user data from Context
   
   const fetchData = async () => {
     if (!user) {
@@ -17,7 +18,10 @@ function Account() {
         });
         if (response.data){
 
-            updateUser({ bio: response.data.bio, 
+          setUser({ 
+            name: user.name,
+              id: user.id,
+              bio: response.data.bio, 
               pfp_path: response.data.pfp_path, 
               fav_artist: response.data.fav_artist, 
               friends: response.data.friend_amount,

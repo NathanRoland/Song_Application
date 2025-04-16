@@ -19,12 +19,14 @@ function Signup() {
         email: email
       });
 
-      //navigate("/new-page")
       if (response.data.user){
-        setUser(response.data.user)
+        const newUser = { name: response.data.user,
+          id: response.data.id };
+
+        setUser(newUser);
+        navigate("/account")
       }
       console.log(response.data)
-      window.location.href = response.data.redirect_url;
       
     } catch (error) {
       console.error("Error sending data:", error);

@@ -21,6 +21,11 @@ def drop_user_tables():
         session.execute(text('DROP TABLE IF EXISTS users'))
         session.commit()
 
+def searchForLikeUsers(search):
+    with Session(engine) as session:
+        return session.execute(select(User.user_id, User.username).where(User.username.like(search))).all()
+
+
 def get_user(username: str):
     with Session(engine) as session:
         return session.get(User, username)
