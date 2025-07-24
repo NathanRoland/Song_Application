@@ -2,6 +2,7 @@ import { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "./userContext";
+
 function Login() {
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
@@ -12,19 +13,36 @@ function Login() {
     try {
       const response = await axios.post("http://127.0.0.1:5000/login/user", {
         name: name,
-        password: password
+        password: password,
       });
 
-      //navigate("/new-page")
-
-      if (response.data.user){
-        const newUser = { name: response.data.user,
-          id: response.data.id };
-
-        setUser(newUser);
-        navigate("/account")
+      if (response.data.user) {
+        // After login, fetch full account info
+        const userId = response.data.id;
+        const userName = response.data.user;
+        const accountRes = await axios.post("http://127.0.0.1:5000/account", {
+          name: userName,
+          id: userId,
+        });
+        if (accountRes.data) {
+          setUser({
+            name: userName,
+            id: userId,
+            bio: accountRes.data.bio,
+            pfp_path: accountRes.data.pfp_path,
+            fav_artist: accountRes.data.fav_artist,
+            friend_amount: accountRes.data.friend_amount,
+            following_amount: accountRes.data.following_amount,
+            insta_link: accountRes.data.insta_link,
+            spotify_link: accountRes.data.spotify_link,
+            apple_music_link: accountRes.data.apple_music_link,
+            soundcloud_link: accountRes.data.soundcloud_link,
+          });
+        } else {
+          setUser({ name: userName, id: userId });
+        }
+        navigate("/account");
       }
-      
     } catch (error) {
       console.error("Error sending data:", error);
     }
@@ -45,9 +63,7 @@ function Login() {
         value={password}
         onChange={(e) => setPassword(e.target.value)}
       />
-      
       <button onClick={sendDataToFlask}>Submit</button>
-
     </div>
   );
 }

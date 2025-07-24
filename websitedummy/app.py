@@ -5,6 +5,7 @@ from song import *
 from classes import *
 from comments import *
 from playlist import *
+from music_data import *
 
 from flask import Flask, render_template, request, abort, url_for
 from flask_socketio import SocketIO
@@ -12,6 +13,7 @@ import json
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import secrets
+import billboard
 import bcrypt
 
 app = Flask(__name__)
@@ -36,9 +38,12 @@ def login_user():
         abort(404)
     name = data.get('name')
     password = data.get('password')
-    user_password = get_user_password(name)[0][0]
+    user_password = get_user_password(name)
+    if len(user_password) == 0:
+        redirect_url = "http://localhost:3000/login"
+        return jsonify({"redirect_url": redirect_url})
     print(user_password)
-    if password != user_password:
+    if password != user_password[0][0]:
         redirect_url = "http://localhost:3000/login"
         return jsonify({"redirect_url": redirect_url})
     else:
@@ -55,6 +60,7 @@ def login_user():
 @app.route("/signup/user", methods=["POST"])
 def signup_user():
     print("test")
+    get_metabrains_access_token()
     data=request.json
     print("recieved:data", data)
     if not request.is_json:
@@ -107,7 +113,27 @@ def display_account():
 
     return jsonify({"bio": bio, "pfp_path": pfp_path, "fav_artist": fav_artist, "friend_amount": friends, "following_amount": following, "insta_link": insta_link, "spotify_link": spotify_link, "apple_music_link": apple_music_link, "soundcloud_link":soundcloud_link})
 
-#@app.route("/account/edit", methods=["POST"])
+@app.route("/account/edit", methods=["POST"])
+def edit_account():
+    data = request.json
+    name = data.get('name')
+    # Update fields if present
+    if 'bio' in data:
+        change_bio(name, data['bio'])
+    if 'pfp_path' in data:
+        set_pfp(name, data['pfp_path'])
+    if 'fav_artist' in data:
+        # You may need to implement change_fav_artist if not present
+        pass
+    if 'insta_link' in data:
+        change_insta_link(name, data['insta_link'])
+    if 'spotify_link' in data:
+        change_spotify_link(name, data['spotify_link'])
+    if 'apple_music_link' in data:
+        change_apple_music_link(name, data['apple_music_link'])
+    if 'soundcloud_link' in data:
+        change_soundcloud_link(name, data['soundcloud_link'])
+    return jsonify({"success": True})
 
 @app.route("/artist", methods=["POST"])
 def display_artist():
@@ -198,6 +224,7 @@ def getResult():
     
 @app.route("/user")
 def display_user():
+
     username = request.args.get("user")
     user_id = get_user_id_by_username(username)
     bio=get_user_bio(username)[0][0]
@@ -224,20 +251,81 @@ def display_user():
         playlists_data.append(playlist_data)
     return jsonify({"bio": bio, "pfp_path": pfp_path, "fav_artist": fav_artist, "friend_amount": friends, "following_amount": following, "insta_link": insta_link, "spotify_link": spotify_link, "apple_music_link": apple_music_link, "soundcloud_link":soundcloud_link})
 
-@app.route("/user")
-def display_user():
-    return
+@app.route("/home")
+def home():
+    return "OK"
 
-@app.route("/user")
-def display_user():
-    return
+@app.route("/charts")
+def charts():
+    return "OK"
 
-@app.route("/user")
-def display_user():
-    return
+@app.route("/charts/billboard/hot-100")
+def top_charts():
+    chart = billboard.ChartData('hot-100')
+    entries = [
+        {
+            "rank": entry.rank,
+            "title": entry.title,
+            "artist": entry.artist,
+            "lastPos": entry.lastPos,
+            "peakPos": entry.peakPos,
+            "weeks": entry.weeks
+        }
+        for entry in chart
+    ]
+    return jsonify({
+        "chart": {
+            "title": chart.name,
+            "date": chart.date,
+            "entries": entries
+        }
+    })
 
-@app.route("/user")
-def display_user():
-    return
+@app.route("/charts/billboard-200")
+def top_200():
+    chart = billboard.ChartData('billboard-200')
+    print(chart)
+    entries = [
+        {
+            "rank": entry.rank,
+            "title": entry.title,
+            "artist": entry.artist,
+            "lastPos": entry.lastPos,
+            "peakPos": entry.peakPos,
+            "weeks": entry.weeks
+        }
+        for entry in chart
+    ]
+    return jsonify({
+        "chart": {
+            "title": chart.name,
+            "date": chart.date,
+            "entries": entries
+        }
+    })
+
+@app.route("/charts/billboard/global-200")
+def top_global_200():
+    chart = billboard.ChartData('billboard-global-200')
+    print(chart)
+    entries = [
+        {
+            "rank": entry.rank,
+            "title": entry.title,
+            "artist": entry.artist, 
+            "lastPos": entry.lastPos,
+            "peakPos": entry.peakPos,
+            "weeks": entry.weeks
+        }
+        for entry in chart
+    ]
+    return jsonify({
+        "chart": {
+            "title": chart.name,
+            "date": chart.date,
+            "entries": entries
+        }
+    })
+
 if __name__ == '__main__':
     app.run(debug=True)

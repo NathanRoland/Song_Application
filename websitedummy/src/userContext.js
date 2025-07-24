@@ -1,4 +1,4 @@
-import { createContext, useState, useContext } from "react";
+import { createContext, useState, useContext, useEffect } from "react";
 
 // Create User Context
 const UserContext = createContext();
@@ -8,10 +8,24 @@ export const useUser = () => useContext(UserContext);
 
 // Context Provider Component
 export const UserProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
+  // Initialize user from localStorage if available
+  const [user, setUserState] = useState(() => {
+    const storedUser = localStorage.getItem("user");
+    return storedUser ? JSON.parse(storedUser) : null;
+  });
 
-  const updateUser = (newData) => {
-    setUser((prevUser) => ({ ...prevUser, ...newData }));
+  // Update localStorage whenever user changes
+  useEffect(() => {
+    if (user) {
+      localStorage.setItem("user", JSON.stringify(user));
+    } else {
+      localStorage.removeItem("user");
+    }
+  }, [user]);
+
+  // setUser wrapper to keep API the same
+  const setUser = (newUser) => {
+    setUserState(newUser);
   };
 
   return (
