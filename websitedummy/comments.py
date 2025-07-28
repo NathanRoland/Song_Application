@@ -30,6 +30,9 @@ def delete_song_comment(comment_id: int):
         session.execute()
 
 #unfinished function (get comment_id)
+def get_all_song_comments(song_id):
+    with Session(engine) as session:
+        return session.execute(select(Song_Comments.comment_id, Song_Comments.user_id, Song_Comments.comment_text, Song_Comments.time, Song_Comments.parent_comment_id).where(Song_Comments.song_id == song_id)).all()
 
 def get_comment_id(song_id, user_id, time):
      with Session(engine) as session:
@@ -136,3 +139,36 @@ def get_time(comment_id: int):
 def get_parent_comment_id(comment_id: int):
     with Session(engine) as session:
         return session.execute(select(Playlist_Comments.parent_comment_id).where(Playlist_Comments.comment_id == comment_id)).all()
+
+
+def add_song_like(song_id, user_id):
+    with Session(engine) as session:
+        session.execute(update(SongLikes).where(SongLikes.song_id == song_id and SongLikes.user_id == user_id).values(like = True))
+        session.execute()
+
+def get_song_likes(song_id):
+    with Session(engine) as session:
+        return session.execute(select(func.count(SongLikes.user_id)).where(SongLikes.song_id == song_id)).all()
+
+def remove_song_like(song_id, user_id):
+    with Session(engine) as session:
+        session.execute(update(SongLikes.user_id).where(SongLikes.song_id == song_id and SongLikes.user_id == user_id).values(user_id = None))
+        session.execute()
+
+def get_all_release_comments(release_id):
+    with Session(engine) as session:
+        return session.execute(select(Release_Comments.comment_id, Release_Comments.user_id, Release_Comments.comment_text, Release_Comments.time, Release_Comments.parent_comment_id).where(Release_Comments.release_id == release_id)).all()
+
+def get_release_likes(release_id):
+    with Session(engine) as session:
+        return session.execute(select(func.count(ReleaseLikes.user_id)).where(ReleaseLikes.release_id == release_id)).all()
+
+def add_release_like(release_id, user_id):
+    with Session(engine) as session:
+        session.execute(update(ReleaseLikes).where(ReleaseLikes.release_id == release_id and ReleaseLikes.user_id == user_id).values(like = True))
+        session.execute()
+
+def remove_release_like(release_id, user_id):
+    with Session(engine) as session:
+        session.execute(update(ReleaseLikes).where(ReleaseLikes.release_id == release_id and ReleaseLikes.user_id == user_id).values(like = False))
+        session.execute()

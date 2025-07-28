@@ -18,17 +18,25 @@ Base.metadata.create_all(engine)
 
 #songs
 
-def createSong(name, artist_id, release_date, time, unreleased, apl_plays, spt_plays, soundcloud_plays, release_id, song_pic):
+def create_song(song_id, name, artist_id, artist_id_2, artist_id_3, artist_id_4, release_date, time, unreleased, apl_plays, spt_plays, soundcloud_plays, release_id, song_pic):
     with Session(engine) as session:
-        song = Song(name=name, artist_id=artist_id, release_date=release_date, time=time, unreleased=unreleased, apl_plays=apl_plays, spt_plays=spt_plays, soundcloud_plays=soundcloud_plays, release_id=release_id, song_pic=song_pic)
+        song = Song(song_id=song_id, name=name, artist_id=artist_id, artist_id_2=artist_id_2, artist_id_3=artist_id_3, artist_id_4=artist_id_4, release_date=release_date, time=time, unreleased=unreleased, apl_plays=apl_plays, spt_plays=spt_plays, soundcloud_plays=soundcloud_plays, release_id=release_id, song_pic=song_pic)
         session.add(song)
         session.commit()
 
+def get_song_info_from_release(release_id: str):
+    with Session(engine) as session:
+        return session.execute(select(Song.song_id, Song.name, Song.artist_id, Song.artist_id_2, Song.artist_id_3, Song.artist_id_4, Song.release_date, Song.time, Song.unreleased, Song.apl_plays, Song.spt_plays, Song.soundcloud_plays, Song.release_id, Song.song_pic).where(Song.release_id == release_id)).all()
+
 def searchForLikeSongs(search):
     with Session(engine) as session:
-        return session.execute(select(Song.song_id, Song.name).where(Song.name.like(search))).all()
+        return session.execute(select(Song.song_id).where(Song.name.like(f"%{search}%"))).all()
 
-def get_artists_songs(artist_id: int):
+def get_song_info(song_id: str):
+    with Session(engine) as session:
+        return session.execute(select(Song.song_id, Song.name, Song.artist_id, Song.artist_id_2, Song.artist_id_3, Song.artist_id_4, Song.release_date, Song.time, Song.unreleased, Song.apl_plays, Song.spt_plays, Song.soundcloud_plays, Song.release_id, Song.song_pic).where(Song.song_id == song_id)).all()
+
+def get_artists_songs(artist_id: str):
     with Session(engine) as session:
         return session.execute(select(Song.song_id).where(Song.artist_id== artist_id)).all()
 
@@ -128,15 +136,38 @@ def set_song_pic(song_id: int, song_pic: str):
 
 #releases
 
-def create_release(name, artist_id, release_date, time, unreleased, is_album, is_EP, is_Song, release_pic):
+def create_release(release_id, name, artist_id, artist_id_2, artist_id_3, artist_id_4, release_date, time, unreleased, is_album, is_EP, is_Song, release_pic):
     with Session(engine) as session:
-        release = Release(name=name, artist_id=artist_id, release_date=release_date, time=time, unreleased=unreleased, is_album=is_album, is_EP=is_EP, is_Song=is_Song, release_pic=release_pic)
+        release = Release(release_id=release_id, name=name, artist_id=artist_id, artist_id_2=artist_id_2, artist_id_3=artist_id_3, artist_id_4=artist_id_4, release_date=release_date, time=time, unreleased=unreleased, is_album=is_album, is_EP=is_EP, is_Song=is_Song, release_pic=release_pic)
         session.add(release)
         session.commit()
 
+def get_release_info(release_id: str):
+    with Session(engine) as session:
+        return session.execute(select(Release.release_id, Release.name, Release.artist_id, Release.artist_id_2, Release.artist_id_3, Release.artist_id_4, Release.release_date, Release.time, Release.unreleased, Release.is_album, Release.is_EP, Release.is_Song, Release.release_pic).where(Release.release_id == release_id)).all()
+
+def get_release_info_from_artist(artist_id: str):
+    print(f"Searching for releases with artist_id: {artist_id}")
+    with Session(engine) as session:  
+        result = session.execute(
+            select(Release.release_id).where(Release.artist_id == artist_id)
+        ).all()
+        result += session.execute(
+            select(Release.release_id).where(Release.artist_id_2 == artist_id)
+        ).all()
+        result += session.execute(
+            select(Release.release_id).where(Release.artist_id_3 == artist_id)
+        ).all()
+        result += session.execute(
+            select(Release.release_id).where(Release.artist_id_4 == artist_id)
+        ).all()
+        
+        return result
+
 def searchForLikeReleases(search):
     with Session(engine) as session:
-        return session.execute(select(Release.release_id, Release.name).where(Release.name.like(search))).all()
+        return session.execute(select(Release.release_id).where(Release.name.like(f"%{search}%"))).all()
+
 
 def get_artists_releasess(artist_id: int):
     with Session(engine) as session:
@@ -145,6 +176,14 @@ def get_artists_releasess(artist_id: int):
 def get_release_name(release_id: int):
     with Session(engine) as session:
         return session.execute(select(Release.name).where(Release.release_id == release_id)).all()
+
+def check_song_exists(song_id: int):
+    with Session(engine) as session:
+        return session.execute(select(Song.song_id).where(Song.song_id == song_id)).all()
+
+def check_release_exists(release_id: int):
+    with Session(engine) as session:
+        return session.execute(select(Release.release_id).where(Release.release_id == release_id)).all()
 
 def get_artist_id(release_id: int):
     with Session(engine) as session:

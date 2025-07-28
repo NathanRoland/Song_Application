@@ -39,30 +39,36 @@ class User(Base):
 
 class Song(Base):
     __tablename__ = "songs"
-    song_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    name: Mapped[str] = mapped_column(String)
-    artist_id: Mapped[int] = mapped_column(Integer)
-    release_date: Mapped[str] = mapped_column(String)
-    time: Mapped[int] = mapped_column(Integer)
-    unreleased: Mapped[bool] = mapped_column(Boolean)
-    apl_plays: Mapped[int] = mapped_column(Integer)
-    spt_plays: Mapped[int] = mapped_column(Integer)
-    soundcloud_plays: Mapped[int] = mapped_column(Integer)
-    release_id: Mapped[int] = mapped_column(Integer)
-    song_pic: Mapped[str] = mapped_column(String)
+    song_id: Mapped[int] = mapped_column(String, primary_key=True)
+    name: Mapped[str] = mapped_column(String, nullable=True)
+    artist_id: Mapped[str] = mapped_column(String, nullable=True)
+    artist_id_2: Mapped[str] = mapped_column(String, nullable=True)
+    artist_id_3: Mapped[str] = mapped_column(String, nullable=True)
+    artist_id_4: Mapped[str] = mapped_column(String, nullable=True)
+    release_date: Mapped[str] = mapped_column(String, nullable=True)
+    time: Mapped[int] = mapped_column(Integer, nullable=True)
+    unreleased: Mapped[bool] = mapped_column(Boolean, nullable=True)
+    apl_plays: Mapped[int] = mapped_column(Integer, nullable=True)
+    spt_plays: Mapped[int] = mapped_column(Integer, nullable=True)
+    soundcloud_plays: Mapped[int] = mapped_column(Integer, nullable=True)
+    release_id: Mapped[str] = mapped_column(String, nullable=True)
+    song_pic: Mapped[str] = mapped_column(String, nullable=True)
 
 class Release(Base):
     __tablename__ = "release"
-    release_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    name: Mapped[str] = mapped_column(String)
-    artist_id: Mapped[int] = mapped_column(Integer)
-    release_date: Mapped[str] = mapped_column(String)
-    time: Mapped[int] = mapped_column(Integer)
-    unreleased: Mapped[bool] = mapped_column(Boolean)
-    is_album: Mapped[bool] = mapped_column(Boolean)
-    is_EP: Mapped[bool] = mapped_column(Boolean)
-    is_Song: Mapped[bool] = mapped_column(Boolean)
-    release_pic: Mapped[str] = mapped_column(String)
+    release_id: Mapped[str] = mapped_column(String, primary_key=True)
+    name: Mapped[str] = mapped_column(String, nullable=True)
+    artist_id: Mapped[str] = mapped_column(String)
+    artist_id_2: Mapped[str] = mapped_column(String, nullable=True)
+    artist_id_3: Mapped[str] = mapped_column(String, nullable=True)
+    artist_id_4: Mapped[str] = mapped_column(String, nullable=True)
+    release_date: Mapped[str] = mapped_column(String, nullable=True)
+    time: Mapped[int] = mapped_column(Integer, nullable=True)
+    unreleased: Mapped[bool] = mapped_column(Boolean, nullable=True)
+    is_album: Mapped[bool] = mapped_column(Boolean, nullable=True)
+    is_EP: Mapped[bool] = mapped_column(Boolean, nullable=True)
+    is_Song: Mapped[bool] = mapped_column(Boolean, nullable=True)
+    release_pic: Mapped[str] = mapped_column(String, nullable=True)
 
 class Song_Comments(Base):
     __tablename__ = "song_comments"
@@ -96,16 +102,18 @@ class Playlist_Comments(Base):
 
 class Artist(Base):
     __tablename__ = "artists"
-    user_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    artist_id: Mapped[str] = mapped_column(String, primary_key=True)
     username: Mapped[str] = mapped_column(String)
-    password: Mapped[str] = mapped_column(String)
-    bio: Mapped[str] = mapped_column(String)
-    pfp_path: Mapped[str] = mapped_column(String)
-    insta_link: Mapped[str] = mapped_column(String)
-    spotify_link: Mapped[str] = mapped_column(String)
-    apple_music_link: Mapped[str] = mapped_column(String)
-    soundcloud_link: Mapped[str] = mapped_column(String)
-    email: Mapped[str] = mapped_column(String)
+    password: Mapped[str] = mapped_column(String, nullable=True)
+    bio: Mapped[str] = mapped_column(String, nullable=True)
+    pfp_path: Mapped[str] = mapped_column(String, nullable=True)
+    insta_link: Mapped[str] = mapped_column(String, nullable=True)
+    spotify_link: Mapped[str] = mapped_column(String, nullable=True)
+    apple_music_link: Mapped[str] = mapped_column(String, nullable=True)
+    soundcloud_link: Mapped[str] = mapped_column(String, nullable=True)
+    email: Mapped[str] = mapped_column(String, nullable=True)
+    country: Mapped[str] = mapped_column(String, nullable=True)
+    genre: Mapped[str] = mapped_column(String, nullable=True)
 
 class Playlist(Base):
     __tablename__ = "playlists"

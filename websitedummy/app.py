@@ -7,17 +7,19 @@ from comments import *
 from playlist import *
 from music_data import *
 
-from flask import Flask, render_template, request, abort, url_for
+from flask import Flask, render_template, request, abort, url_for, send_from_directory
 from flask_socketio import SocketIO
 import json
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import secrets
 import billboard
+
 import bcrypt
 
 app = Flask(__name__)
 CORS(app)
+
 
 # secret key used to sign the session cookie
 app.config['SECRET_KEY'] = secrets.token_hex()
@@ -53,6 +55,8 @@ def login_user():
         return jsonify({"user": name, "id": user_id})
 
 @app.route("/main")
+def main():
+    return send_from_directory('public', 'index.html')
 
 # handles a post request when the user clicks the signup button
 @app.route("/signup", methods=['GET'])
@@ -60,7 +64,6 @@ def login_user():
 @app.route("/signup/user", methods=["POST"])
 def signup_user():
     print("test")
-    get_metabrains_access_token()
     data=request.json
     print("recieved:data", data)
     if not request.is_json:
@@ -135,43 +138,244 @@ def edit_account():
         change_soundcloud_link(name, data['soundcloud_link'])
     return jsonify({"success": True})
 
-@app.route("/artist", methods=["POST"])
-def display_artist():
-    artist_name = request.args.get("artist")
-    artist_id = get_artist_id(artist_name)
-    bio = get_bio(artist_id)
-    pfp = get_pfp_path(artist_id)
-    insta = get_insta_link(artist_id)
-    spotify = get_spotify_link(artist_id)
-    apple = get_apple_music_link(artist_id)
-    soundcloud = get_soundcloud_link(artist_id)
-    song_ids = get_artists_songs(artist_id)
-    songs = []
-    albums = []
-    EPs = []
-    for music in song_ids:
-        song = {}
-        song["id"] = music
-        song["name"] = get_name(music)
-        song["pic"] = get_song_pic(music)
-        song["date"] = get_release_date(get_release_id(music))
-        songs.append(song)
+@app.route("/artist/info", methods=["POST"])
+def artist_info():
+    data = request.json
+    artist_id = data.get("artist_id")
+    if not artist_id:
+        return jsonify({"error": "artist_id required"}), 400
+    result = retrive_artist_info(artist_id)
+    if not result or not result[0]:
+        return jsonify({"error": "Artist not found"}), 404
+    row = result[0]
+    #releases = get_artists_releasess(artist_id)
+    #process_artist_releases(artist_id)
+    all_releases = []
+    releases = get_release_info_from_artist(str(artist_id))
+    if len(releases) == 0:
+        process_artist_releases(artist_id)
+    releases = get_release_info_from_artist(str(artist_id))
+    for release in releases:
+        release_dist = {}
+        release_info = get_release_info(release[0])
+        release_dist["id"] = release_info[0][0]
+        release_dist["name"] = release_info[0][1]
+        release_dist["date"] = release_info[0][6]
+        release_dist["time"] = release_info[0][7]
+        release_dist["unreleased"] = release_info[0][8]
+        release_dist["is_album"] = release_info[0][9]
+        release_dist["is_EP"] = release_info[0][10]
+        release_dist["songs"] = []
+        for song in get_song_info_from_release(release[0]):
+            song_dist = {}
+            song_dist["id"] = song[0]
+            song_dist["name"] = song[1]
+            song_dist["artist_id"] = song[2]
+            song_dist["artist_id_2"] = song[3]
+            song_dist["artist_id_3"] = song[4]
+            song_dist["artist_id_4"] = song[5]
+            song_dist["release_date"] = song[6]
+            song_dist["time"] = song[7]
+            song_dist["unreleased"] = song[8]
+            song_dist["apl_plays"] = song[9]
+            song_dist["spt_plays"] = song[10]
+            song_dist["soundcloud_plays"] = song[11]
+            release_dist["songs"].append(song_dist)
+        all_releases.append(release_dist)
+    #print(releases)
+    return jsonify({
+        "id": row[0],
+        "name": row[1],
+        "bio": row[2],
+        "insta_link": row[3],
+        "spotify_link": row[4],
+        "apple_music_link": row[5],
+        "soundcloud_link": row[6],
+        "country": row[7],
+        "genre": row[8],
+        "releases": all_releases
+    })
 
-    release_ids = get_artists_releasess(artist_id)
-    for music in release_ids:
-        if get_is_album(music):
-            album = {}
-            album["name"] = get_release_name(music)
-            album["pic"] = get_release_pic(music)
-            album["date"] = get_release_date(music)
-            albums.append(album)
-        elif get_is_EP(music):
-            EP_a = {}
-            EP_a["name"] = get_release_name(music)
-            EP_a["pic"] = get_release_pic(music)
-            EP_a["date"] = get_release_date(music)
-            EPs.append[EP_a]
-    return jsonify({"bio": bio, "pfp_path": pfp, "insta_link": insta, "spotify_link": spotify, "apple_music_link": apple, "soundcloud_link":soundcloud, "albums": albums, "songs": songs, "EPs": EPs})
+@app.route("/artists", methods=["POST"])
+def get_artists():
+    print("test")
+    data = request.json
+    data_artist_name = data.get("artist")
+    artists = searchForLikeArtists(data_artist_name)
+    all_artists = []
+    if len(artists) == 0:
+        artist_info = get_artist_from_musicbrainz(data_artist_name)
+        for artist in artist_info:
+            
+            if len(get_username(artist["id"])) == 0:
+                if "area" not in artist:
+                    create_artist(artist["id"], artist["name"], None, None, None, None, None, None, None, None, None, None)
+                else:
+                    if artist.get("area") is not None:
+                        create_artist(artist["id"], artist["name"], None, None, None, None, None, None, None, None, artist["area"]["name"], None)
+                    else:
+                        create_artist(artist["id"], artist["name"], None, None, None, None, None, None, None, None, None, None)
+            if artist.get("area") is not None:
+                all_artists.append({"id": artist["id"], "name": artist["name"], "country": artist["area"]["name"], "genre": None})
+            else:
+                all_artists.append({"id": artist["id"], "name": artist["name"], "country": None, "genre": None})
+    else:
+        for artist in artists:
+            print(artist)
+            country = get_country(artist[0])
+            country_value = country[0][0] if country and country[0] else None
+            genre = get_genre(artist[0])
+            genre_value = genre[0][0] if genre and genre[0] else None
+            all_artists.append({
+                "id": artist[0],
+                "name": artist[1],
+                "country": country_value,
+                "genre": genre_value
+            })
+        #data_artist_id = searchForLikeArtists(data_artist_name)
+        #print(data_artist_id)
+    return jsonify({"artists": all_artists})
+
+@app.route("/songs", methods=["POST"])
+def get_songs():
+    print("songs")
+
+    #get_song_from_name_musicbrainz("STARING INTO THE SUN")
+    data = request.json
+    song_name = data.get("song")
+    print(song_name)
+    song_info = searchForLikeSongs(song_name)
+    if len(song_info) == 0:
+        get_song_from_name_musicbrainz(song_name)
+        song_info = searchForLikeSongs(song_name)
+    print(song_info)
+    all_songs = []
+    for song in song_info:
+        print(song[0])
+        song_deets = get_song_info(song[0])
+        print(song_deets)
+        song_dist = {}
+        song_dist["id"] = song_deets[0][0]
+        song_dist["name"] = song_deets[0][1]
+        artists_ids = [song_deets[0][2], song_deets[0][3], song_deets[0][4], song_deets[0][5]]
+        artist_names = []
+        for artist_id in artists_ids:
+            if artist_id:
+                artist_deets = get_artist_name(artist_id)
+                if artist_deets and artist_deets[0]:
+                    artist_names.append(artist_deets[0][0])
+        song_dist["artist_names"] = artist_names
+        song_dist["release_date"] = song_deets[0][6]
+        song_dist["time"] = song_deets[0][7]
+        song_dist["unreleased"] = song_deets[0][8]
+        song_dist["apl_plays"] = song_deets[0][9]
+        song_dist["spt_plays"] = song_deets[0][10]
+        song_dist["soundcloud_plays"] = song_deets[0][11]
+        all_songs.append(song_dist)
+
+    release_info = searchForLikeReleases(song_name)
+    releases = []
+    for release in release_info:
+        release_dist = {}
+        release_deets = get_release_info(release[0])
+        release_dist["id"] = release_deets[0][0]
+        release_dist["name"] = release_deets[0][1]
+        artists_ids = [release_deets[0][2], release_deets[0][3], release_deets[0][4], release_deets[0][5]]
+        artist_names = []
+        for artist_id in artists_ids:
+            if artist_id:
+                artist_deets = get_artist_name(artist_id)
+                if artist_deets and artist_deets[0]:
+                    artist_names.append(artist_deets[0][0])
+        release_dist["artist_names"] = artist_names
+        release_dist["date"] = release_deets[0][6]
+        release_dist["time"] = release_deets[0][7]
+        release_dist["unreleased"] = release_deets[0][8]
+        release_dist["is_album"] = release_deets[0][9]
+        release_dist["is_EP"] = release_deets[0][10]
+        release_dist["is_Song"] = release_deets[0][11]
+        
+        # Get songs for this release
+        release_dist["songs"] = []
+        songs_in_release = get_song_info_from_release(release[0])
+        for song in songs_in_release:
+            song_dist = {}
+            song_dist["id"] = song[0]
+            song_dist["name"] = song[1]
+            artists_ids = [song[2], song[3], song[4], song[5]]
+            artist_names = []
+            for artist_id in artists_ids:
+                if artist_id:
+                    artist_deets = get_artist_name(artist_id)
+                    if artist_deets and artist_deets[0]:
+                        artist_names.append(artist_deets[0][0])
+            song_dist["artist_names"] = artist_names
+            song_dist["release_date"] = song[6]
+            song_dist["time"] = song[7]
+            song_dist["unreleased"] = song[8]
+            song_dist["apl_plays"] = song[9]
+            song_dist["spt_plays"] = song[10]
+            song_dist["soundcloud_plays"] = song[11]
+            release_dist["songs"].append(song_dist)
+        
+        releases.append(release_dist)
+    return jsonify({"songs": all_songs, "releases": releases})
+
+@app.route("/song/info", methods=["POST"])
+def get_song_info_page():
+    data = request.json
+    print("test")
+    song_id = data.get("song_id")
+    song_deets = get_song_info(song_id)
+    song_dist = {}
+    song_dist["id"] = song_deets[0][0]
+    song_dist["name"] = song_deets[0][1]
+    artists_ids = [song_deets[0][2], song_deets[0][3], song_deets[0][4], song_deets[0][5]]
+    artist_names = []
+    for artist_id in artists_ids:
+        if artist_id:
+            artist_deets = get_artist_name(artist_id)
+            if artist_deets and artist_deets[0]:
+                artist_names.append(artist_deets[0][0])
+    song_dist["artist_names"] = artist_names
+    song_dist["release_date"] = song_deets[0][6]
+    song_dist["time"] = song_deets[0][7]
+    song_dist["unreleased"] = song_deets[0][8]
+    song_dist["apl_plays"] = song_deets[0][9]
+    song_dist["spt_plays"] = song_deets[0][10]
+    song_dist["soundcloud_plays"] = song_deets[0][11]
+    song_dist["release_name"] = get_release_name(song_deets[0][12])[0][0]
+    song_dist["comments"] = get_all_song_comments(song_id)
+    song_dist["likes"] = get_song_likes(song_id)[0][0]
+    print(song_dist)
+    return jsonify({"song": song_dist})
+
+@app.route("/release/info", methods=["POST"])
+def get_release_info_page():
+    data = request.json
+    print("test2")
+    release_id = data.get("release_id")
+    release_deets = get_release_info(release_id)
+    release_dist = {}
+    release_dist["id"] = release_deets[0][0]
+    release_dist["name"] = release_deets[0][1]
+    artists_ids = [release_deets[0][2], release_deets[0][3], release_deets[0][4], release_deets[0][5]]
+    artist_names = []
+    for artist_id in artists_ids:
+        if artist_id:
+            artist_deets = get_artist_name(artist_id)
+            if artist_deets and artist_deets[0]:
+                artist_names.append(artist_deets[0][0])
+    release_dist["artist_names"] = artist_names
+    release_dist["release_date"] = release_deets[0][6]
+    release_dist["time"] = release_deets[0][7]
+    release_dist["unreleased"] = release_deets[0][8]
+    release_dist["is_album"] = release_deets[0][9]
+    release_dist["is_EP"] = release_deets[0][10]
+    release_dist["is_Song"] = release_deets[0][11]
+    release_dist["comments"] = get_all_release_comments(release_id)
+    release_dist["likes"] = get_release_likes(release_id)[0][0]
+    return jsonify({"release": release_dist})
 
 #search function
 @app.route("/search", methods=["POST"])
@@ -179,7 +383,6 @@ def search():
     search_query = request.json.get("search")
     print(search_query)
     songs = searchForLikeSongs(search_query)
-    #songs = list
     artists = searchForLikeArtists(search_query)
     users = searchForLikeUsers(search_query)
     releases = searchForLikeReleases(search_query)
@@ -253,14 +456,17 @@ def display_user():
 
 @app.route("/home")
 def home():
+    print("home")
     return "OK"
 
 @app.route("/charts")
 def charts():
+    print("charts")
     return "OK"
 
 @app.route("/charts/billboard/hot-100")
 def top_charts():
+    get_artist_from_musicbrainz("KETTAMA")
     chart = billboard.ChartData('hot-100')
     entries = [
         {
@@ -326,6 +532,11 @@ def top_global_200():
             "entries": entries
         }
     })
+
+@app.route("/dubfinder", methods=["POST"])
+def dubfinder():
+    print("dubfinder")
+    return "OK"
 
 if __name__ == '__main__':
     app.run(debug=True)

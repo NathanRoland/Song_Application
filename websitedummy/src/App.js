@@ -12,6 +12,10 @@ import Hot100Chart from "./Hot100Chart";
 import Billboard200Chart from "./Billboard200Chart";
 import Global200Chart from "./Global200Chart";
 import Charts from "./Charts";
+import DisplayArtist from "./DisplayArtist";
+import DisplaySong from "./DisplaySong";
+import DisplayRelease from "./DisplayRelease";
+import DubFinder from "./DubFinder";
 import { UserProvider } from "./userContext";
 import TopBar from "./TopBar";
 
@@ -45,6 +49,10 @@ function App() {
             <Route path="/charts/billboard/hot-100" element={<Hot100Chart />} />
             <Route path="/charts/billboard/200" element={<Billboard200Chart />} />
             <Route path="/charts/billboard/global-200" element={<Global200Chart />} />
+            <Route path="/artist/:id" element={<DisplayArtist />} />
+            <Route path="/song/info/:id" element={<DisplaySong />} />
+            <Route path="/release/info/:id" element={<DisplayRelease />} />
+            <Route path="/dubfinder" element={<DubFinder />} />
           </Route>
         </Routes>
       </UserProvider>
