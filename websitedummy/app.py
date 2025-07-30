@@ -6,6 +6,7 @@ from classes import *
 from comments import *
 from playlist import *
 from music_data import *
+from acoutid import *
 
 from flask import Flask, render_template, request, abort, url_for, send_from_directory
 from flask_socketio import SocketIO
@@ -16,6 +17,8 @@ import secrets
 import billboard
 
 import bcrypt
+import os
+import tempfile
 
 app = Flask(__name__)
 CORS(app)
@@ -533,10 +536,44 @@ def top_global_200():
         }
     })
 
-@app.route("/dubfinder", methods=["POST"])
-def dubfinder():
-    print("dubfinder")
-    return "OK"
+@app.route("/dubfinder/upload", methods=["POST"])
+def dubfinder_upload():
+    print("dubfinder_upload")
+    try:
+        if 'file' not in request.files:
+            return jsonify({"error": "No file provided"}), 400
+        
+        file = request.files['file']
+        if file.filename == '':
+            return jsonify({"error": "No file selected"}), 400
+        
+        # Check if file is an audio file
+        if not file.content_type.startswith('audio/'):
+            return jsonify({"error": "File must be an audio file"}), 400
+        
+        print(f"Received file: {file.filename}")
+        print(f"File type: {file.content_type}")
+        
+        # Process the file with your existing get_ID function
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as tmp:
+            file.save(tmp.name)
+            tmp_path = tmp.name
+
+        try:
+            track_info = recognize_song(tmp_path)
+        finally:
+            os.unlink(tmp_path)  # Always clean up
+
+        return jsonify({
+            "success": True,
+            "message": "File uploaded and analyzed successfully",
+            "filename": file.filename,
+            "result": track_info
+        })
+        
+    except Exception as e:
+        print(f"Error in dubfinder_upload: {str(e)}")
+        return jsonify({"error": "Failed to process file"}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)

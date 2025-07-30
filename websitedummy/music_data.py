@@ -31,7 +31,6 @@ def get_artist_from_musicbrainz(artist_name):
     data = response.json()
 
     # Print first result
-    print(data)
     for artist in data["artists"][:1]:
         print(f"Name: {artist['name']}")
         print(f"ID: {artist['id']}")
