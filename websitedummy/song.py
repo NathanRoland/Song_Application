@@ -76,7 +76,7 @@ def get_soundcloud_plays(song_id: int):
     with Session(engine) as session:
         return session.execute(select(Song.soundcloud_plays).where(Song.song_id == song_id)).all()
 
-def get_release_id(song_id: int):
+def get_release_id(song_id: str):
     with Session(engine) as session:
         return session.execute(select(Song.release_id).where(Song.song_id == song_id)).all()
 
@@ -129,7 +129,7 @@ def set_release_id(song_id: int, release_id: str):
         session.execute(update(Song).where(Song.song_id == song_id).values(release_id=release_id))
         session.commit()
 
-def set_song_pic(song_id: int, song_pic: str):
+def set_song_pic(song_id: str, song_pic: str):
     with Session(engine) as session:
         session.execute(update(Song).where(Song.song_id == song_id).values(song_pic=song_pic))
         session.commit()
@@ -213,7 +213,7 @@ def get_is_Song(release_id: int):
     with Session(engine) as session:
         return session.execute(select(Release.is_Song).where(Release.release_id == release_id)).all()
 
-def get_release_pic(release_id: int):
+def get_release_pic(release_id: str):
     with Session(engine) as session:
         return session.execute(select(Release.release_pic).where(Release.release_id == release_id)).all()
 
@@ -257,7 +257,18 @@ def set_is_Song(release_id: int, is_Song: bool):
         session.execute(update(Release).where(Release.release_id == release_id).values(is_Song=is_Song))
         session.commit()
 
-def set_release_pic(release_id: int, release_pic: str):
+def set_release_pic(release_id: str, release_pic: str):
     with Session(engine) as session:
         session.execute(update(Release).where(Release.release_id == release_id).values(release_pic=release_pic))
         session.commit()
+
+def find_cover_art_for_release():
+    with Session(engine) as session:    
+        all_rows = session.execute(select(Release.release_id, Release.release_pic)).all()
+        return all_rows
+
+def find_cover_art_for_song():
+    with Session(engine) as session:
+        all_rows = session.execute(select(Song.song_id, Song.song_pic)).all()
+        return all_rows
+
