@@ -128,32 +128,65 @@ function Songs() {
                 borderRadius: 8, 
                 background: "#fafafa" 
               }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
-                  <h4 style={{ margin: 0, color: "#222", cursor: "pointer" }} onClick={() => handleSongClick(song.id)}>
-                    {song.name}
-                  </h4>
-                  <span style={{ 
-                    padding: "4px 8px", 
-                    background: "#222", 
-                    color: "#fff", 
-                    borderRadius: 4, 
-                    fontSize: 12 
-                  }}>
-                    Song
-                  </span>
-                </div>
-                
-                <p style={{ margin: "8px 0", color: "#666", fontSize: 14 }}>
-                  <strong>Artists:</strong> {song.artist_names ? song.artist_names.filter(name => name).join(", ") : "N/A"}
-                </p>
-                
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 8, fontSize: 12, color: "#888" }}>
-                  <div><strong>Release Date:</strong> {song.release_date || "N/A"}</div>
-                  <div><strong>Duration:</strong> {formatDuration(song.time)}</div>
-                  <div><strong>Status:</strong> {song.unreleased ? "Unreleased" : "Released"}</div>
-                  <div><strong>Apple Plays:</strong> {formatPlayCount(song.apl_plays)}</div>
-                  <div><strong>Spotify Plays:</strong> {formatPlayCount(song.spt_plays)}</div>
-                  <div><strong>SoundCloud Plays:</strong> {formatPlayCount(song.soundcloud_plays)}</div>
+                <div style={{ display: "flex", gap: 16, alignItems: "flex-start" }}>
+                  <div style={{ flexShrink: 0 }}>
+                    {song.pic && song.pic !== "0" && song.pic !== "1" && song.pic !== null ? (
+                      <img 
+                        src={song.pic} 
+                        alt={song.name}
+                        style={{ 
+                          width: 60, 
+                          height: 60, 
+                          borderRadius: 8, 
+                          objectFit: "cover",
+                          border: "1px solid #eee"
+                        }}
+                      />
+                    ) : (
+                      <div style={{ 
+                        width: 60, 
+                        height: 60, 
+                        borderRadius: 8, 
+                        background: "#f0f0f0", 
+                        display: "flex", 
+                        alignItems: "center", 
+                        justifyContent: "center",
+                        fontSize: 24,
+                        border: "1px solid #eee"
+                      }}>
+                        🎵
+                      </div>
+                    )}
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
+                      <h4 style={{ margin: 0, color: "#222", cursor: "pointer" }} onClick={() => handleSongClick(song.id)}>
+                        {song.name}
+                      </h4>
+                      <span style={{ 
+                        padding: "4px 8px", 
+                        background: "#222", 
+                        color: "#fff", 
+                        borderRadius: 4, 
+                        fontSize: 12 
+                      }}>
+                        Song
+                      </span>
+                    </div>
+                    
+                    <p style={{ margin: "8px 0", color: "#666", fontSize: 14 }}>
+                      <strong>Artists:</strong> {song.artist_names ? song.artist_names.filter(name => name).join(", ") : "N/A"}
+                    </p>
+                    
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 8, fontSize: 12, color: "#888" }}>
+                      <div><strong>Release Date:</strong> {song.release_date || "N/A"}</div>
+                      <div><strong>Duration:</strong> {formatDuration(song.time)}</div>
+                      <div><strong>Status:</strong> {song.unreleased ? "Unreleased" : "Released"}</div>
+                      <div><strong>Apple Plays:</strong> {formatPlayCount(song.apl_plays)}</div>
+                      <div><strong>Spotify Plays:</strong> {formatPlayCount(song.spt_plays)}</div>
+                      <div><strong>SoundCloud Plays:</strong> {formatPlayCount(song.soundcloud_plays)}</div>
+                    </div>
+                  </div>
                 </div>
               </div>
             ))}
@@ -193,56 +226,121 @@ function Songs() {
                 borderRadius: 8, 
                 background: "#fafafa" 
               }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
-                  <h4 style={{ margin: 0, color: "#222", cursor: "pointer" }} onClick={() => handleReleaseClick(release.id)}>
-                    {release.name}
-                  </h4>
-                  <span style={{ 
-                    padding: "4px 8px", 
-                    background: "#444", 
-                    color: "#fff", 
-                    borderRadius: 4, 
-                    fontSize: 12 
-                  }}>
-                    {getReleaseType(release)}
-                  </span>
-                </div>
-                
-                <p style={{ margin: "8px 0", color: "#666", fontSize: 14 }}>
-                  <strong>Artists:</strong> {release.artist_names ? release.artist_names.filter(name => name).join(", ") : "N/A"}
-                </p>
-                
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 8, fontSize: 12, color: "#888" }}>
-                  <div><strong>Release Date:</strong> {release.date || "N/A"}</div>
-                  <div><strong>Duration:</strong> {formatDuration(release.time)}</div>
-                  <div><strong>Status:</strong> {release.unreleased ? "Unreleased" : "Released"}</div>
-                  <div><strong>Type:</strong> {getReleaseType(release)}</div>
-                </div>
-                
-                {/* Songs in this release */}
-                {release.songs && release.songs.length > 0 && (
-                  <div style={{ marginTop: 12, paddingTop: 12, borderTop: "1px solid #eee" }}>
-                    <h5 style={{ margin: "0 0 8px 0", color: "#666", fontSize: 13 }}>Songs in this release:</h5>
-                    <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                      {release.songs.map((song, songIndex) => (
-                        <div key={songIndex} style={{ 
-                          padding: 8, 
-                          background: "#f5f5f5", 
-                          borderRadius: 4, 
-                          fontSize: 12 
-                        }}>
-                          <div style={{ fontWeight: "bold", color: "#333" }}>{song.name}</div>
-                          <div style={{ color: "#666", marginTop: 2 }}>
-                            Duration: {formatDuration(song.time)} | 
-                            Apple: {formatPlayCount(song.apl_plays)} | 
-                            Spotify: {formatPlayCount(song.spt_plays)} | 
-                            SoundCloud: {formatPlayCount(song.soundcloud_plays)}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
+                <div style={{ display: "flex", gap: 16, alignItems: "flex-start" }}>
+                  <div style={{ flexShrink: 0 }}>
+                    {release.pic && release.pic !== "0" && release.pic !== "1" && release.pic !== null ? (
+                      <img 
+                        src={release.pic} 
+                        alt={release.name}
+                        style={{ 
+                          width: 60, 
+                          height: 60, 
+                          borderRadius: 8, 
+                          objectFit: "cover",
+                          border: "1px solid #eee"
+                        }}
+                      />
+                    ) : (
+                      <div style={{ 
+                        width: 60, 
+                        height: 60, 
+                        borderRadius: 8, 
+                        background: "#f0f0f0", 
+                        display: "flex", 
+                        alignItems: "center", 
+                        justifyContent: "center",
+                        fontSize: 24,
+                        border: "1px solid #eee"
+                      }}>
+                        🎵
+                      </div>
+                    )}
                   </div>
-                )}
+                  <div style={{ flex: 1 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
+                      <h4 style={{ margin: 0, color: "#222", cursor: "pointer" }} onClick={() => handleReleaseClick(release.id)}>
+                        {release.name}
+                      </h4>
+                      <span style={{ 
+                        padding: "4px 8px", 
+                        background: "#444", 
+                        color: "#fff", 
+                        borderRadius: 4, 
+                        fontSize: 12 
+                      }}>
+                        {getReleaseType(release)}
+                      </span>
+                    </div>
+                    
+                    <p style={{ margin: "8px 0", color: "#666", fontSize: 14 }}>
+                      <strong>Artists:</strong> {release.artist_names ? release.artist_names.filter(name => name).join(", ") : "N/A"}
+                    </p>
+                    
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 8, fontSize: 12, color: "#888" }}>
+                      <div><strong>Release Date:</strong> {release.date || "N/A"}</div>
+                      <div><strong>Duration:</strong> {formatDuration(release.time)}</div>
+                      <div><strong>Status:</strong> {release.unreleased ? "Unreleased" : "Released"}</div>
+                      <div><strong>Type:</strong> {getReleaseType(release)}</div>
+                    </div>
+                    
+                    {/* Songs in this release */}
+                    {release.songs && release.songs.length > 0 && (
+                      <div style={{ marginTop: 12, paddingTop: 12, borderTop: "1px solid #eee" }}>
+                        <h5 style={{ margin: "0 0 8px 0", color: "#666", fontSize: 13 }}>Songs in this release:</h5>
+                        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                          {release.songs.map((song, songIndex) => (
+                            <div key={songIndex} style={{ 
+                              padding: 8, 
+                              background: "#f5f5f5", 
+                              borderRadius: 4, 
+                              fontSize: 12,
+                              display: "flex",
+                              gap: 8,
+                              alignItems: "center"
+                            }}>
+                              <div style={{ flexShrink: 0 }}>
+                                {song.pic && song.pic !== "0" && song.pic !== "1" && song.pic !== null ? (
+                                  <img 
+                                    src={song.pic} 
+                                    alt={song.name}
+                                    style={{ 
+                                      width: 30, 
+                                      height: 30, 
+                                      borderRadius: 4, 
+                                      objectFit: "cover"
+                                    }}
+                                  />
+                                ) : (
+                                  <div style={{ 
+                                    width: 30, 
+                                    height: 30, 
+                                    borderRadius: 4, 
+                                    background: "#e0e0e0", 
+                                    display: "flex", 
+                                    alignItems: "center", 
+                                    justifyContent: "center",
+                                    fontSize: 12
+                                  }}>
+                                    🎵
+                                  </div>
+                                )}
+                              </div>
+                              <div style={{ flex: 1 }}>
+                                <div style={{ fontWeight: "bold", color: "#333" }}>{song.name}</div>
+                                <div style={{ color: "#666", marginTop: 2 }}>
+                                  Duration: {formatDuration(song.time)} | 
+                                  Apple: {formatPlayCount(song.apl_plays)} | 
+                                  Spotify: {formatPlayCount(song.spt_plays)} | 
+                                  SoundCloud: {formatPlayCount(song.soundcloud_plays)}
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
             ))}
             

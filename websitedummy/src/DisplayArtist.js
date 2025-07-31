@@ -94,31 +94,99 @@ function DisplayArtist() {
           </div>
           {sortedReleases.map((release, index) => (
             <div key={index} style={{ marginBottom: 20, padding: 16, border: "1px solid #eee", borderRadius: 8 }}>
-              <h4>{release.name}</h4>
-              <p><strong>Release Date:</strong> {release.date || "N/A"}</p>
-              <p><strong>Duration:</strong> {release.time || "N/A"} minutes</p>
-              <p><strong>Unreleased:</strong> {release.unreleased ? "Yes" : "No"}</p>
-              <p><strong>Type:</strong> {getReleaseType(release)}</p>
-              
-              {release.songs && release.songs.length > 0 && (
-                <div>
-                  <h5>Songs</h5>
-                  <ul>
-                    {release.songs.map((song, songIndex) => (
-                      <li key={songIndex}>
-                        <strong>{song.name}</strong>
-                        <br />
-                        <small>
-                          Duration: {song.time || "N/A"} minutes | 
-                          Apple Plays: {song.apl_plays || "N/A"} | 
-                          Spotify Plays: {song.spt_plays || "N/A"} | 
-                          SoundCloud Plays: {song.soundcloud_plays || "N/A"}
-                        </small>
-                      </li>
-                    ))}
-                  </ul>
+              <div style={{ display: "flex", gap: 16, alignItems: "flex-start" }}>
+                <div style={{ flexShrink: 0 }}>
+                  {release.pic && release.pic !== "0" && release.pic !== "1" && release.pic !== null ? (
+                    <img 
+                      src={release.pic} 
+                      alt={release.name}
+                      style={{ 
+                        width: 80, 
+                        height: 80, 
+                        borderRadius: 8, 
+                        objectFit: "cover",
+                        border: "1px solid #eee"
+                      }}
+                    />
+                  ) : (
+                    <div style={{ 
+                      width: 80, 
+                      height: 80, 
+                      borderRadius: 8, 
+                      background: "#f0f0f0", 
+                      display: "flex", 
+                      alignItems: "center", 
+                      justifyContent: "center",
+                      fontSize: 32,
+                      border: "1px solid #eee"
+                    }}>
+                      🎵
+                    </div>
+                  )}
                 </div>
-              )}
+                <div style={{ flex: 1 }}>
+                  <h4 style={{ margin: "0 0 8px 0" }}>{release.name}</h4>
+                  <p><strong>Release Date:</strong> {release.date || "N/A"}</p>
+                  <p><strong>Duration:</strong> {release.time || "N/A"} minutes</p>
+                  <p><strong>Unreleased:</strong> {release.unreleased ? "Yes" : "No"}</p>
+                  <p><strong>Type:</strong> {getReleaseType(release)}</p>
+                  
+                  {release.songs && release.songs.length > 0 && (
+                    <div style={{ marginTop: 12 }}>
+                      <h5 style={{ margin: "0 0 8px 0" }}>Songs</h5>
+                      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                        {release.songs.map((song, songIndex) => (
+                          <div key={songIndex} style={{ 
+                            padding: 8, 
+                            background: "#f5f5f5", 
+                            borderRadius: 4,
+                            display: "flex",
+                            gap: 8,
+                            alignItems: "center"
+                          }}>
+                            <div style={{ flexShrink: 0 }}>
+                              {song.pic && song.pic !== "0" && song.pic !== "1" && song.pic !== null ? (
+                                <img 
+                                  src={song.pic} 
+                                  alt={song.name}
+                                  style={{ 
+                                    width: 40, 
+                                    height: 40, 
+                                    borderRadius: 4, 
+                                    objectFit: "cover"
+                                  }}
+                                />
+                              ) : (
+                                <div style={{ 
+                                  width: 40, 
+                                  height: 40, 
+                                  borderRadius: 4, 
+                                  background: "#e0e0e0", 
+                                  display: "flex", 
+                                  alignItems: "center", 
+                                  justifyContent: "center",
+                                  fontSize: 16
+                                }}>
+                                  🎵
+                                </div>
+                              )}
+                            </div>
+                            <div style={{ flex: 1 }}>
+                              <strong style={{ display: "block", marginBottom: 2 }}>{song.name}</strong>
+                              <small style={{ color: "#666" }}>
+                                Duration: {song.time || "N/A"} minutes | 
+                                Apple Plays: {song.apl_plays || "N/A"} | 
+                                Spotify Plays: {song.spt_plays || "N/A"} | 
+                                SoundCloud Plays: {song.soundcloud_plays || "N/A"}
+                              </small>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
           ))}
         </div>
