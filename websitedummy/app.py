@@ -6,6 +6,7 @@ from classes import *
 from comments import *
 from playlist import *
 from music_data import *
+from kworb_scraper import *
 from acoutid import *
 
 from flask import Flask, render_template, request, abort, url_for, send_from_directory
@@ -102,7 +103,7 @@ def display_account():
         following=len(get_user_following(name))
     except:
         following=0
-    insta_link=get_insta_link(name)
+    insta_link= get_insta_link(name)
     spotify_link=get_spotify_link(name)
     apple_music_link=get_apple_music_link(name)
     soundcloud_link=get_soundcloud_link(name)
@@ -158,7 +159,9 @@ def artist_info():
     if len(releases) == 0:
         process_artist_releases(artist_id)
     releases = get_release_info_from_artist(str(artist_id))
+    print("hre")
     for release in releases:
+        print(release)
         release_dist = {}
         release_info = get_release_info(release[0])
         release_dist["id"] = release_info[0][0]
@@ -169,6 +172,7 @@ def artist_info():
         release_dist["is_album"] = release_info[0][9]
         release_dist["is_EP"] = release_info[0][10]
         release_dist["songs"] = []
+        release_dist["pic"] = get_release_pic(release[0])[0][0]
         for song in get_song_info_from_release(release[0]):
             song_dist = {}
             song_dist["id"] = song[0]
@@ -183,9 +187,11 @@ def artist_info():
             song_dist["apl_plays"] = song[9]
             song_dist["spt_plays"] = song[10]
             song_dist["soundcloud_plays"] = song[11]
+            song_dist["pic"] = get_song_pic(song[0])[0][0] if get_song_pic(song[0]) and get_song_pic(song[0])[0] else None
             release_dist["songs"].append(song_dist)
         all_releases.append(release_dist)
     #print(releases)
+    print(row, all_releases)
     return jsonify({
         "id": row[0],
         "name": row[1],
@@ -206,7 +212,7 @@ def get_artists():
     data_artist_name = data.get("artist")
     artists = searchForLikeArtists(data_artist_name)
     all_artists = []
-    if len(artists) == 0:
+    if len(artists) <= 1:
         artist_info = get_artist_from_musicbrainz(data_artist_name)
         for artist in artist_info:
             
@@ -274,6 +280,8 @@ def get_songs():
         song_dist["apl_plays"] = song_deets[0][9]
         song_dist["spt_plays"] = song_deets[0][10]
         song_dist["soundcloud_plays"] = song_deets[0][11]
+        song_dist["release_id"] = song_deets[0][12]
+        song_dist["pic"] = get_song_pic(song[0])[0][0] if get_song_pic(song[0]) and get_song_pic(song[0])[0] else None
         all_songs.append(song_dist)
 
     release_info = searchForLikeReleases(song_name)
@@ -297,7 +305,7 @@ def get_songs():
         release_dist["is_album"] = release_deets[0][9]
         release_dist["is_EP"] = release_deets[0][10]
         release_dist["is_Song"] = release_deets[0][11]
-        
+        release_dist["pic"] = get_release_pic(release[0])[0][0] if get_release_pic(release[0]) and get_release_pic(release[0])[0] else None
         # Get songs for this release
         release_dist["songs"] = []
         songs_in_release = get_song_info_from_release(release[0])
@@ -319,6 +327,7 @@ def get_songs():
             song_dist["apl_plays"] = song[9]
             song_dist["spt_plays"] = song[10]
             song_dist["soundcloud_plays"] = song[11]
+            song_dist["pic"] = get_song_pic(song[0])[0][0] if get_song_pic(song[0]) and get_song_pic(song[0])[0] else None
             release_dist["songs"].append(song_dist)
         
         releases.append(release_dist)
@@ -348,6 +357,7 @@ def get_song_info_page():
     song_dist["spt_plays"] = song_deets[0][10]
     song_dist["soundcloud_plays"] = song_deets[0][11]
     song_dist["release_name"] = get_release_name(song_deets[0][12])[0][0]
+    song_dist["pic"] = get_song_pic(song_id)[0][0] if get_song_pic(song_id) and get_song_pic(song_id)[0] else None
     song_dist["comments"] = get_all_song_comments(song_id)
     song_dist["likes"] = get_song_likes(song_id)[0][0]
     print(song_dist)
@@ -376,6 +386,7 @@ def get_release_info_page():
     release_dist["is_album"] = release_deets[0][9]
     release_dist["is_EP"] = release_deets[0][10]
     release_dist["is_Song"] = release_deets[0][11]
+    release_dist["pic"] = get_release_pic(release_id)[0][0] if get_release_pic(release_id) and get_release_pic(release_id)[0] else None
     release_dist["comments"] = get_all_release_comments(release_id)
     release_dist["likes"] = get_release_likes(release_id)[0][0]
     return jsonify({"release": release_dist})
@@ -469,7 +480,6 @@ def charts():
 
 @app.route("/charts/billboard/hot-100")
 def top_charts():
-    get_artist_from_musicbrainz("KETTAMA")
     chart = billboard.ChartData('hot-100')
     entries = [
         {
@@ -535,6 +545,37 @@ def top_global_200():
             "entries": entries
         }
     })
+
+@app.route("/charts/spotify/daily", methods=["POST"])
+def spotify_daily():
+    data = request.json
+    if data:
+        country = data.get("country")
+    else:
+        country = "Global"
+    data = get_spotify_chart_daily_data(country, "Daily")
+    return jsonify({"data": data})
+
+@app.route("/charts/spotify/weekly", methods=["POST"])
+def spotify_weekly():
+    data = request.json
+    if data:
+        country = data.get("country")
+    else:
+        country = "Global"
+    data = get_spotify_chart_weekly_data(country, "Weekly")
+    return jsonify({"data": data})
+
+@app.route("/charts/apple_music", methods=["POST"])
+def apple_music_charts():
+    data = request.json
+    if data:
+        country = data.get("country")
+    else:
+        country = "United States"
+    data = get_apple_music_charts(country)
+    #print(data)
+    return jsonify({"data": data})
 
 @app.route("/dubfinder/upload", methods=["POST"])
 def dubfinder_upload():

@@ -12,10 +12,12 @@ import Hot100Chart from "./Hot100Chart";
 import Billboard200Chart from "./Billboard200Chart";
 import Global200Chart from "./Global200Chart";
 import Charts from "./Charts";
+import SpotifyCharts from "./SpotifyCharts";
 import DisplayArtist from "./DisplayArtist";
 import DisplaySong from "./DisplaySong";
 import DisplayRelease from "./DisplayRelease";
 import DubFinder from "./DubFinder";
+import AppleMusicCharts from "./AppleMusicCharts";
 import { UserProvider } from "./userContext";
 import TopBar from "./TopBar";
 
@@ -49,6 +51,8 @@ function App() {
             <Route path="/charts/billboard/hot-100" element={<Hot100Chart />} />
             <Route path="/charts/billboard/200" element={<Billboard200Chart />} />
             <Route path="/charts/billboard/global-200" element={<Global200Chart />} />
+            <Route path="/charts/spotify" element={<SpotifyCharts />} />
+            <Route path="/charts/applemusic" element={<AppleMusicCharts />} />
             <Route path="/artist/:id" element={<DisplayArtist />} />
             <Route path="/song/info/:id" element={<DisplaySong />} />
             <Route path="/release/info/:id" element={<DisplayRelease />} />

@@ -220,3 +220,33 @@ def get_song_from_name_musicbrainz(song_name):
         print(f"{name} — {artists} ({duration}) {release_id} {type}")    
     #print(data)
 
+def set_all_release_pics():
+    all_rows = find_cover_art_for_release()
+    for row in all_rows:
+        print(row)
+        release_id = row[0]
+        release_pic = row[-1]
+        cover_art_url = f"https://coverartarchive.org/release/{release_id}/front"
+        response = requests.get(cover_art_url)
+        if response.status_code == 200:
+            print(cover_art_url)
+            set_release_pic(release_id, cover_art_url)
+        else:
+            print("no cover art found") 
+            set_release_pic(release_id, None)
+
+def set_all_song_pics():
+    all_rows = find_cover_art_for_song()
+    for row in all_rows:
+        print(row)
+        song_id = row[0]
+        release_id = get_release_id(song_id)[0][0]
+        print(release_id)
+        cover_art_url = f"https://coverartarchive.org/release/{release_id}/front"
+        response = requests.get(cover_art_url)
+        if response.status_code == 200:
+            print(cover_art_url)
+            set_song_pic(song_id, cover_art_url)
+        else:
+            print("no cover art found") 
+            set_song_pic(song_id, None)
