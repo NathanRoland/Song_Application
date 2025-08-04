@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useUser } from "./userContext";
+import SearchBar from "./SearchBar";
 
 function TopBar() {
   const { user, setUser } = useUser();
@@ -28,17 +29,20 @@ function TopBar() {
     <nav style={{
       width: "100%",
       background: "#222",
-      padding: "16px 0",
-      paddingLeft: 32,
+      padding: "16px 32px",
       display: "flex",
-      justifyContent: "center",
+      justifyContent: "space-between",
       alignItems: "center",
-      gap: 24,
       position: "fixed",
       top: 0,
       left: 0,
       zIndex: 1000
     }}>
+      <div style={{
+        display: "flex",
+        alignItems: "center",
+        gap: 24
+      }}>
       <Link to="/" style={{ 
         color: "#fff", 
         textDecoration: "none", 
@@ -58,9 +62,14 @@ function TopBar() {
       <Link to="/artists" style={{ color: "#fff", textDecoration: "none", fontWeight: 600, fontSize: 18 }}>Artists</Link>
       <Link to="/dubfinder" style={{ color: "#fff", textDecoration: "none", fontWeight: 600, fontSize: 18 }}>DubFinder</Link>
       <Link to="/playlists" style={{ color: "#fff", textDecoration: "none", fontWeight: 600, fontSize: 18 }}>Playlists</Link>
-      <Link to="/charts" style={{ color: "#fff", textDecoration: "none", fontWeight: 600, fontSize: 18 }}>Charts</Link>
+        <Link to="/charts" style={{ color: "#fff", textDecoration: "none", fontWeight: 600, fontSize: 18 }}>Charts</Link>
+      </div>
+      
+      {/* Search Bar */}
+      <SearchBar />
+      
       {/* User Icon Dropdown */}
-      <div style={{ marginLeft: "auto", marginRight: 32, position: "relative" }} ref={menuRef}>
+      <div style={{ position: "relative" }} ref={menuRef}>
         <button
           onClick={() => setMenuOpen((open) => !open)}
           style={{

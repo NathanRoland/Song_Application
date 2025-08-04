@@ -13,7 +13,7 @@ class OnlineUser(Base):
 
 class User(Base):
     __tablename__ = "users"
-    user_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    user_id: Mapped[str] = mapped_column(Integer, primary_key=True)
     username: Mapped[str] = mapped_column(String, unique=True)
     password: Mapped[str] = mapped_column(String)
     bio: Mapped[str] = mapped_column(String, nullable=True)
@@ -29,6 +29,7 @@ class User(Base):
     country: Mapped[str] = mapped_column(String, nullable=True)
     postcode: Mapped[str] = mapped_column(String, nullable=True)
     date_of_birth: Mapped[DateTime] = mapped_column(DateTime, nullable=True)
+    isArtist: Mapped[bool] = mapped_column(Boolean, nullable=True)
     email: Mapped[str] = mapped_column(String, unique=True)
     #username, password, favourite artist, bio, favourite song, pfp, links to other socials
     #artist following
@@ -186,3 +187,30 @@ class ReleaseLikes(Base):
     like_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     user_id: Mapped[int] = mapped_column(Integer)
     release_id: Mapped[int] = mapped_column(Integer)
+
+class Posts(Base):
+    __tablename__ = "posts"
+    post_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    user_id: Mapped[int] = mapped_column(Integer)
+    post_title: Mapped[str] = mapped_column(String)
+    post_text: Mapped[str] = mapped_column(String)
+    photo_path: Mapped[str] = mapped_column(String, nullable=True)
+    time: Mapped[DateTime] = mapped_column(DateTime)
+    likes: Mapped[int] = mapped_column(Integer)
+    comments: Mapped[int] = mapped_column(Integer)
+
+class PostLikes(Base):
+    __tablename__ = "post_likes"
+    like_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    user_id: Mapped[int] = mapped_column(Integer)
+    post_id: Mapped[int] = mapped_column(Integer)
+
+class PostComments(Base):
+    __tablename__ = "post_comments"
+    comment_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    user_id: Mapped[int] = mapped_column(Integer)
+    post_id: Mapped[int] = mapped_column(Integer)
+    comment_text: Mapped[str] = mapped_column(String)
+    time: Mapped[DateTime] = mapped_column(DateTime)
+    likes: Mapped[int] = mapped_column(Integer)
+    parent_comment_id: Mapped[int] = mapped_column(Integer)

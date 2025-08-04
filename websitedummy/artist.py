@@ -3,15 +3,11 @@ from sqlalchemy.orm import Session
 from sqlalchemy.exc import PendingRollbackError, IntegrityError
 from classes import *
 from sqlalchemy import text
-
+from user import *
 from pathlib import Path
 
 # creates the database directory
 Path("database").mkdir(exist_ok=True)
-
-# "database/main.db" specifies the database file
-# change it if you wish
-# turn echo = True to display the sql output
 engine = create_engine("sqlite:///database/main.db", echo=False)
 
 # initializes the database
@@ -34,6 +30,7 @@ def create_artist(artist_id, username, password, bio, pfp_path, insta_link, spot
             genre=genre
         )
         session.add(artist)
+        createUser(a)
         session.commit()
 
 def searchForLikeArtists(search):

@@ -1,6 +1,8 @@
+from itertools import count
 from sqlalchemy import create_engine, select, delete, func, update, text
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import PendingRollbackError, IntegrityError
+from sqlalchemy.sql.functions import user
 from classes import *
 
 from pathlib import Path
@@ -21,26 +23,48 @@ def drop_user_tables():
         session.execute(text('DROP TABLE IF EXISTS users'))
         session.commit()
 
+def get_user_non_artist(user_id: str):
+    with Session(engine) as session:
+        return session.execute(select(User.username, User.bio, User.pfp_path, User.fav_artist, User.fav_song, User.insta_link, User.spotify_link, User.apple_music_link, User.soundcloud_link).where(User.user_id == user_id)).all()
+
+def get_user_artist(user_id: str):
+    with Session(engine) as session:
+        return session.execute(select(User.username, User.bio, User.pfp_path, User.insta_link, User.spotify_link, User.apple_music_link, User.soundcloud_link).where(User.user_id == user_id)).all()
+
 def searchForLikeUsers(search):
     with Session(engine) as session:
         return session.execute(select(User.user_id, User.username).where(User.username.like(search))).all()
 
+def check_if_artist(user_id: str):
+    with Session(engine) as session:
+        return session.execute(select(User.isArtist).where(User.user_id == user_id)).all()
 
 def get_user(username: str):
     with Session(engine) as session:
         return session.get(User, username)
+
+def create_artist_from_user(artist_id, artist_name):
+    with Session(engine) as session:
+        user = User(username=artist_name, user_id = artist_id, password="None", email="None", isArtist = True)
+        session.add(user)
+        session.commit()
 
 def createUser(username, password, email):
     with Session(engine) as session:
         if (get_user(username)):
             print("Username already in database")
         else:
-            user = User(username=username, password=password, email=email)
+            num = getUsersAmount()
+            user = User(user_id = str(num),username=username, password=password, email=email)
             session.add(user)
             session.commit()
             return True
     return False
 
+def getUsersAmount():
+    with Session(engine) as session:
+        result = session.execute(select(func.count(User.user_id))).scalar_one()
+        return result
 def get_user_id_by_username(username: str) -> int:
     with Session(engine) as session:
         user = session.query(User).filter(User.username == username).first()
@@ -59,6 +83,10 @@ def change_username(old_username:str, new_username: str):
             session.commit()
             return True
         return False
+
+def get_username(user_id: str):
+    with Session(engine) as session:
+        return session.execute(select(User.username).where(User.user_id == user_id)).all()
 
 def get_user_password(username: str):
     with Session(engine) as session:

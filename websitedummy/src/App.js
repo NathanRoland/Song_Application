@@ -18,6 +18,7 @@ import DisplaySong from "./DisplaySong";
 import DisplayRelease from "./DisplayRelease";
 import DubFinder from "./DubFinder";
 import AppleMusicCharts from "./AppleMusicCharts";
+import UserAccount from "./UserAccount";
 import { UserProvider } from "./userContext";
 import TopBar from "./TopBar";
 
@@ -53,6 +54,7 @@ function App() {
             <Route path="/charts/billboard/global-200" element={<Global200Chart />} />
             <Route path="/charts/spotify" element={<SpotifyCharts />} />
             <Route path="/charts/applemusic" element={<AppleMusicCharts />} />
+            <Route path="/account" element={<UserAccount />} />
             <Route path="/artist/:id" element={<DisplayArtist />} />
             <Route path="/song/info/:id" element={<DisplaySong />} />
             <Route path="/release/info/:id" element={<DisplayRelease />} />

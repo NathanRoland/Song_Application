@@ -44,7 +44,7 @@ def get_song_id(name: str):
     with Session(engine) as session:
         return session.execute(select(Song.song_id).where(Song.name == name)).all()
 
-def get_name(song_id: int):
+def get_song_name(song_id: str):
     with Session(engine) as session:
         return session.execute(select(Song.name).where(Song.song_id == song_id)).all()
 
@@ -173,7 +173,7 @@ def get_artists_releasess(artist_id: int):
     with Session(engine) as session:
         return session.execute(select(Release.release_id).where(Release.artist_id== artist_id)).all()
 
-def get_release_name(release_id: int):
+def get_release_name(release_id: str):
     with Session(engine) as session:
         return session.execute(select(Release.name).where(Release.release_id == release_id)).all()
 
