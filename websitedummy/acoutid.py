@@ -8,6 +8,10 @@ from music_data import *
 from song import *
 from pydub import AudioSegment
 import shutil
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 def convert_to_fingerpint(file_path):
     try:
@@ -35,10 +39,11 @@ def convert_to_fingerpint(file_path):
         return None
 
 def get_ID(file):
-    api_key = None
-    with open("api/acoutid.json", "r") as api_file:
-        data = json.load(api_file)
-        api_key = data["api_key"]
+    api_key = os.environ.get("ACOUSTID_API_KEY")
+    if not api_key:
+        print("Error: ACOUSTID_API_KEY not found in environment variables")
+        return None
+    
     duration = 0
     print("converting to fingerprint")
     fingerprint = convert_to_fingerpint(file)
@@ -66,10 +71,10 @@ def get_ID(file):
 
 def recognize_song(file_path):
     url = 'https://api.audd.io/'
-    api_key = None
-    with open("api/audd.json", "r") as api_file:
-        data = json.load(api_file)
-        api_key = data["api_key"]
+    api_key = os.environ.get("AUDD_API_KEY")
+    if not api_key:
+        print("Error: AUDD_API_KEY not found in environment variables")
+        return None
 
     with open(file_path, 'rb') as f:
         files = {

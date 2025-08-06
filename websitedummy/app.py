@@ -955,6 +955,16 @@ def dubfinder_upload():
         print(f"Error in dubfinder_upload: {str(e)}")
         return jsonify({"error": "Failed to process file"}), 500
 
+@app.route("/dubfinder/setlist", methods=["POST"])
+def dubfinder_setlist():
+    data = request.json
+    if data:
+        link = data.get("link")
+    else:
+        return jsonify({"error": "No link provided"}), 400
+    setlist = get_setlist(link)
+    return jsonify({"setlist": setlist})
+
 @app.route("/search", methods=["POST"])
 def search_results():
     data = request.json
