@@ -1,4 +1,4 @@
-.user-account-container {
+.view-account-container {
   max-width: 800px;
   margin: 40px auto;
   padding: 24px;
@@ -23,13 +23,21 @@
   color: #333;
 }
 
-.user-type-badge {
-  padding: 8px 16px;
-  background: linear-gradient(135deg, #1db954 0%, #1ed760 100%);
+.add-friend-button {
+  padding: 12px 24px;
+  background: #1db954;
   color: white;
-  border-radius: 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
   font-weight: 600;
-  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.add-friend-button:hover {
+  background: #1ed760;
+  transform: translateY(-2px);
 }
 
 .account-content {
@@ -86,57 +94,6 @@
   line-height: 1.5;
 }
 
-.account-actions {
-  display: flex;
-  justify-content: center;
-  gap: 12px;
-}
-
-.edit-button, .save-button, .cancel-button {
-  padding: 12px 24px;
-  border: none;
-  border-radius: 8px;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.edit-button {
-  background: #1db954;
-  color: white;
-}
-
-.edit-button:hover {
-  background: #1ed760;
-  transform: translateY(-2px);
-}
-
-.save-button {
-  background: #28a745;
-  color: white;
-}
-
-.save-button:hover {
-  background: #218838;
-  transform: translateY(-2px);
-}
-
-.cancel-button {
-  background: #dc3545;
-  color: white;
-}
-
-.cancel-button:hover {
-  background: #c82333;
-  transform: translateY(-2px);
-}
-
-.edit-actions {
-  display: flex;
-  gap: 12px;
-}
-
 .account-details {
   background: #f8f9fa;
   border-radius: 12px;
@@ -185,27 +142,6 @@
   text-decoration: underline;
 }
 
-.edit-input, .edit-textarea {
-  padding: 12px;
-  border: 2px solid #e9ecef;
-  border-radius: 8px;
-  font-size: 1rem;
-  transition: border-color 0.3s ease;
-  background: white;
-}
-
-.edit-input:focus, .edit-textarea:focus {
-  outline: none;
-  border-color: #1db954;
-  box-shadow: 0 0 0 3px rgba(29, 185, 84, 0.1);
-}
-
-.edit-textarea {
-  resize: vertical;
-  min-height: 80px;
-  font-family: inherit;
-}
-
 .loading-spinner {
   width: 40px;
   height: 40px;
@@ -234,60 +170,6 @@
 .error-message p {
   margin: 0;
   font-weight: 500;
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-  .user-account-container {
-    margin: 20px;
-    padding: 16px;
-  }
-
-  .account-header {
-    flex-direction: column;
-    gap: 16px;
-    text-align: center;
-  }
-
-  .account-header h1 {
-    font-size: 1.8rem;
-  }
-
-  .profile-section {
-    flex-direction: column;
-    text-align: center;
-  }
-
-  .profile-picture {
-    width: 100px;
-    height: 100px;
-  }
-
-  .details-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .edit-actions {
-    flex-direction: column;
-  }
-
-  .edit-button, .save-button, .cancel-button {
-    width: 100%;
-  }
-}
-
-@media (max-width: 480px) {
-  .account-header h1 {
-    font-size: 1.5rem;
-  }
-
-  .profile-info h2 {
-    font-size: 1.3rem;
-  }
-
-  .account-details {
-    padding: 16px;
-  }
 }
 
 /* Posts Section Styles */
@@ -397,13 +279,55 @@
   font-size: 1rem;
 }
 
-.no-posts p:first-child {
-  font-weight: 600;
-  color: #333;
+/* Responsive Design */
+@media (max-width: 768px) {
+  .view-account-container {
+    margin: 20px;
+    padding: 16px;
+  }
+
+  .account-header {
+    flex-direction: column;
+    gap: 16px;
+    text-align: center;
+  }
+
+  .account-header h1 {
+    font-size: 1.8rem;
+  }
+
+  .profile-section {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .profile-picture {
+    width: 100px;
+    height: 100px;
+  }
+
+  .details-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .add-friend-button {
+    width: 100%;
+  }
 }
 
-/* Responsive adjustments for posts */
-@media (max-width: 768px) {
+@media (max-width: 480px) {
+  .account-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .profile-info h2 {
+    font-size: 1.3rem;
+  }
+
+  .account-details {
+    padding: 16px;
+  }
+
   .posts-section {
     padding: 16px;
   }

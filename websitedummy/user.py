@@ -43,9 +43,9 @@ def get_user(username: str):
     with Session(engine) as session:
         return session.get(User, username)
 
-def create_artist_from_user(artist_id, artist_name):
+def create_artist_from_user(artist_id, artist_name, password, email):
     with Session(engine) as session:
-        user = User(username=artist_name, user_id = artist_id, password="None", email="None", isArtist = True)
+        user = User(user_id = artist_id, username=artist_name, password=password, email=email, isArtist=True)
         session.add(user)
         session.commit()
 
@@ -55,7 +55,7 @@ def createUser(username, password, email):
             print("Username already in database")
         else:
             num = getUsersAmount()
-            user = User(user_id = str(num),username=username, password=password, email=email)
+            user = User(user_id = str(num), username=username, password=password, email=email)
             session.add(user)
             session.commit()
             return True
@@ -65,7 +65,7 @@ def getUsersAmount():
     with Session(engine) as session:
         result = session.execute(select(func.count(User.user_id))).scalar_one()
         return result
-def get_user_id_by_username(username: str) -> int:
+def get_user_id_by_username(username: str) -> str:
     with Session(engine) as session:
         user = session.query(User).filter(User.username == username).first()
         if user:

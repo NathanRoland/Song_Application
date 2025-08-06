@@ -21,9 +21,10 @@ const UserAccount = () => {
     try {
       setLoading(true);
       const response = await axios.post('http://127.0.0.1:5000/account', {
-        name: user.name,
-        id: user.id
+        name: typeof user === 'string' ? user : user.name || user,
+        id: typeof user === 'object' && user.id ? user.id : user
       });
+      console.log('Account response:', response.data);
       setUserInfo(response.data);
       setEditForm(response.data.user_info);
     } catch (err) {
@@ -302,6 +303,53 @@ const UserAccount = () => {
             </div>
           </div>
         </div>
+
+        {/* Posts Section */}
+        {userInfo?.posts && userInfo.posts.length > 0 && (
+          <div className="posts-section">
+            <h3>📝 My Posts ({userInfo.posts.length})</h3>
+            <div className="posts-grid">
+              {userInfo.posts.map((post, index) => (
+                <div key={index} className="post-card">
+                  <div className="post-header">
+                    <h4 className="post-title">{post.post_title}</h4>
+                    <span className="post-date">
+                      {new Date(post.time).toLocaleDateString()} at {new Date(post.time).toLocaleTimeString()}
+                    </span>
+                  </div>
+                  
+                  <div className="post-content">
+                    <p className="post-text">{post.post_text}</p>
+                    {post.photo_path && (
+                      <div className="post-image">
+                        <img 
+                          src={post.photo_path} 
+                          alt="Post" 
+                          className="post-photo"
+                        />
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="post-stats">
+                    <span className="post-likes">❤️ {post.like_amount || 0} likes</span>
+                    <span className="post-comments">💬 {post.comment_amount || 0} comments</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {userInfo?.posts && userInfo.posts.length === 0 && (
+          <div className="posts-section">
+            <h3>📝 My Posts</h3>
+            <div className="no-posts">
+              <p>You haven't made any posts yet.</p>
+              <p>Start sharing your thoughts and music!</p>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

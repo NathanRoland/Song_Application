@@ -13,7 +13,7 @@ class OnlineUser(Base):
 
 class User(Base):
     __tablename__ = "users"
-    user_id: Mapped[str] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[str] = mapped_column(String, primary_key=True)
     username: Mapped[str] = mapped_column(String, unique=True)
     password: Mapped[str] = mapped_column(String)
     bio: Mapped[str] = mapped_column(String, nullable=True)
@@ -40,7 +40,7 @@ class User(Base):
 
 class Song(Base):
     __tablename__ = "songs"
-    song_id: Mapped[int] = mapped_column(String, primary_key=True)
+    song_id: Mapped[str] = mapped_column(String, primary_key=True)
     name: Mapped[str] = mapped_column(String, nullable=True)
     artist_id: Mapped[str] = mapped_column(String, nullable=True)
     artist_id_2: Mapped[str] = mapped_column(String, nullable=True)
@@ -75,7 +75,7 @@ class Song_Comments(Base):
     __tablename__ = "song_comments"
     comment_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     song_id: Mapped[int] = mapped_column(Integer)
-    user_id: Mapped[int] = mapped_column(Integer)
+    user_id: Mapped[str] = mapped_column(String)
     comment_text: Mapped[str] = mapped_column(String)
     likes: Mapped[int] = mapped_column(Integer)
     time: Mapped[DateTime] = mapped_column(DateTime)
@@ -85,7 +85,7 @@ class Release_Comments(Base):
     __tablename__ = "release_comments"
     comment_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     release_id: Mapped[int] = mapped_column(Integer)
-    user_id: Mapped[int] = mapped_column(Integer)
+    user_id: Mapped[str] = mapped_column(String)
     comment_text: Mapped[str] = mapped_column(String)
     likes: Mapped[int] = mapped_column(Integer)
     time: Mapped[DateTime] = mapped_column(DateTime)
@@ -95,7 +95,7 @@ class Playlist_Comments(Base):
     __tablename__ = "playlist_comments"
     comment_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     playlist_id: Mapped[int] = mapped_column(Integer)
-    user_id: Mapped[int] = mapped_column(Integer)
+    user_id: Mapped[str] = mapped_column(String)
     comment_text: Mapped[str] = mapped_column(String)
     likes: Mapped[int] = mapped_column(Integer)
     time: Mapped[DateTime] = mapped_column(DateTime)
@@ -119,7 +119,7 @@ class Artist(Base):
 class Playlist(Base):
     __tablename__ = "playlists"
     playlist_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    user_id: Mapped[int] = mapped_column(Integer)
+    user_id: Mapped[str] = mapped_column(String)
     name: Mapped[str] = mapped_column(String)
     bio: Mapped[str] = mapped_column(String)
     order: Mapped[str] = mapped_column(String)
@@ -155,43 +155,43 @@ class Friendships(Base):
 class SongCommentLikes(Base):
     __tablename__ = "song_comment_likes"
     like_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    user_id: Mapped[int] = mapped_column(Integer)
+    user_id: Mapped[str] = mapped_column(String)
     comment_id: Mapped[int] = mapped_column(Integer)
 
 class ReleaseCommentLikes(Base):
     __tablename__ = "release_comment_likes"
     like_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    user_id: Mapped[int] = mapped_column(Integer)
+    user_id: Mapped[str] = mapped_column(String)
     comment_id: Mapped[int] = mapped_column(Integer)
 
 class PlaylistCommentLikes(Base):
     __tablename__ = "playlist_comment_likes"
     like_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    user_id: Mapped[int] = mapped_column(Integer)
+    user_id: Mapped[str] = mapped_column(String)
     comment_id: Mapped[int] = mapped_column(Integer)
 
 class PlaylistLikes(Base):
     __tablename__ = "playlist_likes"
     like_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    user_id: Mapped[int] = mapped_column(Integer)
+    user_id: Mapped[str] = mapped_column(String)
     playlist_id: Mapped[int] = mapped_column(Integer)
 
 class SongLikes(Base):
     __tablename__ = "song_likes"
     like_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    user_id: Mapped[int] = mapped_column(Integer)
+    user_id: Mapped[str] = mapped_column(String)
     song_id: Mapped[int] = mapped_column(Integer)
 
 class ReleaseLikes(Base):
     __tablename__ = "release_likes"
     like_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    user_id: Mapped[int] = mapped_column(Integer)
+    user_id: Mapped[str] = mapped_column(String)
     release_id: Mapped[int] = mapped_column(Integer)
 
 class Posts(Base):
     __tablename__ = "posts"
     post_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    user_id: Mapped[int] = mapped_column(Integer)
+    user_id: Mapped[str] = mapped_column(String)
     post_title: Mapped[str] = mapped_column(String)
     post_text: Mapped[str] = mapped_column(String)
     photo_path: Mapped[str] = mapped_column(String, nullable=True)
@@ -202,13 +202,13 @@ class Posts(Base):
 class PostLikes(Base):
     __tablename__ = "post_likes"
     like_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    user_id: Mapped[int] = mapped_column(Integer)
+    user_id: Mapped[str] = mapped_column(String)
     post_id: Mapped[int] = mapped_column(Integer)
 
 class PostComments(Base):
     __tablename__ = "post_comments"
     comment_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    user_id: Mapped[int] = mapped_column(Integer)
+    user_id: Mapped[str] = mapped_column(String)
     post_id: Mapped[int] = mapped_column(Integer)
     comment_text: Mapped[str] = mapped_column(String)
     time: Mapped[DateTime] = mapped_column(DateTime)

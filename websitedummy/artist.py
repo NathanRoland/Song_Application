@@ -5,6 +5,7 @@ from classes import *
 from sqlalchemy import text
 from user import *
 from pathlib import Path
+from user import *
 
 # creates the database directory
 Path("database").mkdir(exist_ok=True)
@@ -30,7 +31,7 @@ def create_artist(artist_id, username, password, bio, pfp_path, insta_link, spot
             genre=genre
         )
         session.add(artist)
-        createUser(a)
+        create_artist_from_user(str(artist_id), str(username), "password", "email")
         session.commit()
 
 def searchForLikeArtists(search):
@@ -148,3 +149,18 @@ def set_country(artist_id: str, country: str):
     with Session(engine) as session:
         session.execute(update(Artist).where(Artist.artist_id == artist_id).values(country=country))
         session.commit()
+
+def convert_artists_to_users():
+    with Session(engine) as session:
+        all_rows = session.execute(select(Artist.artist_id, Artist.username, Artist.password, Artist.email)).all()
+        for row in all_rows:
+            artist_id = row[0]
+            username = row[1]
+            password = str(row[2])
+            email = str(row[3])
+            print(artist_id, username, password, email)
+            try:
+                #print(artist_id, username, password, email)
+                create_artist_from_user(artist_id, username, password, email)
+            except:
+                print(f"Error converting artist {artist_id} to user")

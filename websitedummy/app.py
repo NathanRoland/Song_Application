@@ -8,6 +8,7 @@ from playlist import *
 from music_data import *
 from kworb_scraper import *
 from acoutid import *
+from post import *
 
 from flask import Flask, render_template, request, abort, url_for, send_from_directory
 from flask_socketio import SocketIO
@@ -86,61 +87,303 @@ def signup_user():
         redirect_url = "http://localhost:3000/signup"
         return jsonify({"redirect_url": redirect_url})
 
+@app.route("/post/publish", methods=["POST"])
+def post():
+    try:
+        user_id = request.form.get("user_id")
+        post_title = request.form.get("post_title")
+        post_text = request.form.get("post_text")
+        
+        photo_path = None
+        if 'photo' in request.files:
+            photo = request.files['photo']
+            if photo.filename != '':
+                # Generate unique filename
+                import uuid
+                filename = f"{uuid.uuid4()}_{photo.filename}"
+                photo_path = f"photos/{filename}"
+                photo.save(photo_path)
+        
+        create_post(user_id, post_title, post_text, photo_path)
+        post_details = get_posts_from_user_id(user_id)[-1]
+        post_info = {
+            "post_id": post_details[0],
+            "post_title": post_details[1],
+            "post_text": post_details[2],
+            "photo_path": post_details[3],
+            "time": post_details[4],
+            "likes": post_details[5],
+            "comments": post_details[6]
+        }
+        return jsonify({"success": True, "post_info": post_info})
+        
+    except Exception as e:
+        print(f"Error in post publish: {str(e)}")
+        return jsonify({"error": "Failed to publish post"}), 500
+
+@app.route("/post/view", methods=["POST"])
+def view_post():
+    data = request.json
+    post_id = data.get("post_id")
+    post_details = get_post_from_post_id(post_id)[0]
+    post_info = {
+        "post_id": post_details[0],
+        "post_title": post_details[1],
+        "post_text": post_details[2],
+        "photo_path": post_details[3],
+        "time": post_details[4],
+        "likes_amount": post_details[5],
+        "comments_amount": post_details[6]
+    }
+    post_comments = get_post_comments(post_id)
+    post_comment_info = []
+    
+    # Organize comments hierarchically
+    comments_dict = {}
+    top_level_comments = []
+    
+    for comment in post_comments:
+        # Get username for the comment author
+        username_result = get_username(comment[1])
+        username = username_result[0][0] if username_result and username_result[0] else f"User {comment[1]}"
+        
+        comment_info = {
+            "comment_id": comment[0],
+            "user_id": comment[1],
+            "username": username,
+            "post_id": comment[2],
+            "comment_text": comment[3],
+            "time": comment[4],
+            "likes": comment[5],
+            "parent_comment_id": comment[6],
+            "replies": []
+        }
+        
+        comments_dict[comment[0]] = comment_info
+        
+        if comment[6] == 0 or comment[6] is None:  # Top-level comment
+            top_level_comments.append(comment_info)
+        else:  # Reply to another comment
+            if comment[6] in comments_dict:
+                comments_dict[comment[6]]["replies"].append(comment_info)
+    
+    post_comment_info = top_level_comments
+    post_info["comments"] = post_comment_info
+    post_likes = get_post_likes(post_id)
+    post_like_info = []
+    for like in post_likes:
+        post_like_info.append({
+            "user_id": like[0],
+            "post_id": like[1]
+        })
+    post_info["likes"] = post_like_info
+    return jsonify({"success": True, "post_info": post_info})
+
+@app.route("/post/view/add_comment", methods=["POST"])
+def add_comment():
+    data = request.json
+    user_id = data.get("user_id")
+    post_id = data.get("post_id")
+    comment_text = data.get("comment_text")
+    parent_comment_id = data.get("parent_comment_id", 0)  # Default to 0 for top-level comments
+    create_post_comment(user_id, post_id, comment_text, datetime.now(), parent_comment_id)
+    return jsonify({"success": True, "message": "Comment added successfully"})
+
+
+@app.route("/feed", methods=["POST"])
+def get_feed():
+    print("feed")
+    try:
+        data = request.json
+        user_id = data.get("user_id")
+        #friends = get_friends(user_id)
+        if not user_id:
+            return jsonify({"error": "user_id required"}), 400
+        feed_posts = get_posts_from_user_id(user_id)
+        feed_posts_info = []
+        for post in feed_posts:
+            user_name = get_username(user_id)[0][0]
+            print(user_name)
+            post_info = {
+                "post_id": post[0],
+                "username": user_name,
+                "post_title": post[1],
+                "post_text": post[2],
+                "photo_path": post[3],
+                "time": post[4],
+                "likes": post[5],
+                "comments": post[6]
+            }
+            feed_posts_info.append(post_info)
+        return jsonify({"posts": feed_posts_info})
+        
+    except Exception as e:
+        print(f"Error in get_feed: {str(e)}")
+        return jsonify({"error": "Failed to load feed"}), 500
+
+@app.route("/post/like", methods=["POST"])
+def like_post():
+    try:
+        data = request.json
+        user_id = data.get("user_id")
+        post_id = data.get("post_id")
+        
+        if not all([user_id, post_id]):
+            return jsonify({"error": "Missing required fields"}), 400
+        
+        # Add like to database
+        add_post_like(post_id)
+        
+        return jsonify({"success": True, "message": "Post liked successfully"})
+        
+    except Exception as e:
+        print(f"Error in like_post: {str(e)}")
+        return jsonify({"error": "Failed to like post"}), 500
+
+@app.route("/account/view", methods=["POST"])
+def view_other_account():
+    data = request.json
+    user_id = data.get("user_id")
+    if_artist = check_if_artist(user_id)[0][0]
+    if if_artist == 1:
+        result = get_user_artist(user_id)[0]
+        user_info = {
+            "username": result[0],
+            "bio": result[1],
+            "pfp_path": result[2],
+            "insta_link": result[3],
+            "spotify_link": result[4],
+            "apple_music_link": result[5],
+            "soundcloud_link": result[6]
+        }
+    else:
+        result = get_user_non_artist(user_id)[0]
+        user_info = {
+            "username": result[0],
+            "bio": result[1],
+            "pfp_path": result[2],
+            "fav_artist": result[3],
+            "fav_song": result[4],
+            "insta_link": result[5],
+            "spotify_link": result[6],
+            "apple_music_link": result[7],
+            "soundcloud_link": result[8]
+        }
+    posts = get_posts_from_user_id(user_id)
+    post_info = []
+    for post in posts:
+        post_info.append({
+            "post_id": post[0],
+            "post_title": post[1],
+            "post_text": post[2],
+            "photo_path": post[3],
+            "time": post[4],
+            "like_amount": post[5],
+            "comment_amount": post[6]
+        })  
+    return jsonify({"user_info": user_info, "posts": post_info})
+
+@app.route("/account/view/add_friend", methods=["POST"])
+def add_friend():
+    data = request.json
+    user_id = data.get("user_id")
+    friend_id = data.get("friend_id")
+    add_friend(user_id, friend_id)
+    return jsonify({"success": True, "message": "Friend added successfully"})
+
 @app.route("/account", methods=["POST"])
 def display_account():
     print("account")
     data=request.json
     name=data.get('name')
     user_id = data.get('id')
-    bio=get_user_bio(name)[0][0]
-    pfp_path=get_user_pfp(name)[0][0]
-    fav_artist=get_fav_artist(name)[0][0]
-    try:
-        friends = len(get_friendship(name))
-    except:
-        friends=0
-    try:
-        following=len(get_user_following(name))
-    except:
-        following=0
-    insta_link= get_insta_link(name)
-    spotify_link=get_spotify_link(name)
-    apple_music_link=get_apple_music_link(name)
-    soundcloud_link=get_soundcloud_link(name)
-    playlists=get_playlist_id(user_id)
-    playlists_data=[]
-    for playlist in playlists:
-        playlist_data = []
-        playlist_data['name'] = get_playlist_name(playlist)
-        playlist_data['pic'] = get_playlist_pic_path(playlist)
-        playlists_data.append(playlist_data)
-    
-    #print(bio, pfp_path, fav_artist, friends, following, insta_link, spotify_link, apple_music_link, soundcloud_link, playlists_data)
-    #return jsonify({"bio": bio, "fav_artist": fav_artist})
-
-    return jsonify({"bio": bio, "pfp_path": pfp_path, "fav_artist": fav_artist, "friend_amount": friends, "following_amount": following, "insta_link": insta_link, "spotify_link": spotify_link, "apple_music_link": apple_music_link, "soundcloud_link":soundcloud_link})
+    if_artist = check_if_artist(user_id)[0][0]
+    print(if_artist)
+    user_info = {}
+    if if_artist != None:
+        result = get_user_artist(user_id)[0]
+        user_info = {
+            "username": result[0],
+            "bio": result[1],
+            "pfp_path": result[2],
+            "insta_link": result[3],
+            "spotify_link": result[4],
+            "apple_music_link": result[5],
+            "soundcloud_link": result[6]
+        }
+        is_artist = True
+    else:
+        result = get_user_non_artist(user_id)[0]
+        user_info = {
+            "username": result[0],
+            "bio": result[1],
+            "pfp_path": result[2],
+            "fav_artist": result[3],
+            "fav_song": result[4],
+            "insta_link": result[5],
+            "spotify_link": result[6],
+            "apple_music_link": result[7],
+            "soundcloud_link": result[8]
+        }
+        is_artist = False
+    posts = get_posts_from_user_id(user_id)
+    print(posts)
+    post_info = []
+    for post in posts:
+        post_info.append({
+            "post_id": post[0],
+            "post_title": post[1],
+            "post_text": post[2],
+            "photo_path": post[3],
+            "time": post[4],
+            "like_amount": post[5],
+            "comment_amount": post[6]
+        })
+    print(post_info)
+    return jsonify({"user_info": user_info, "is_artist": is_artist, "posts": post_info})
 
 @app.route("/account/edit", methods=["POST"])
 def edit_account():
-    data = request.json
-    name = data.get('name')
-    # Update fields if present
-    if 'bio' in data:
-        change_bio(name, data['bio'])
-    if 'pfp_path' in data:
-        set_pfp(name, data['pfp_path'])
-    if 'fav_artist' in data:
-        # You may need to implement change_fav_artist if not present
-        pass
-    if 'insta_link' in data:
-        change_insta_link(name, data['insta_link'])
-    if 'spotify_link' in data:
-        change_spotify_link(name, data['spotify_link'])
-    if 'apple_music_link' in data:
-        change_apple_music_link(name, data['apple_music_link'])
-    if 'soundcloud_link' in data:
-        change_soundcloud_link(name, data['soundcloud_link'])
-    return jsonify({"success": True})
+    try:
+        data = request.json
+        name = data.get('name')
+        user_id = data.get('id')
+        
+        if 'username' in data:
+            change_username(name, data['username'])
+            name = data['username']
+        
+        if 'bio' in data:
+            change_bio(name, data['bio'])
+        
+        if 'pfp_path' in data:
+            set_pfp(name, data['pfp_path'])
+        
+        if 'fav_artist' in data:
+            update_fav_artist(name, data['fav_artist'])
+        
+        if 'fav_song' in data:
+            update_fav_song(name, data['fav_song'])
+        
+        if 'insta_link' in data:
+            change_insta_link(name, data['insta_link'])
+        
+        if 'spotify_link' in data:
+            change_spotify_link(name, data['spotify_link'])
+        
+        if 'apple_music_link' in data:
+            change_apple_music_link(name, data['apple_music_link'])
+        
+        if 'soundcloud_link' in data:
+            change_soundcloud_link(name, data['soundcloud_link'])
+        
+        return jsonify({"success": True, "message": "Account updated successfully"})
+        
+    except Exception as e:
+        print(f"Error in edit_account: {str(e)}")
+        return jsonify({"error": "Failed to update account"}), 500
+
+
 
 @app.route("/artist/info", methods=["POST"])
 def artist_info():
@@ -156,7 +399,7 @@ def artist_info():
     #process_artist_releases(artist_id)
     all_releases = []
     releases = get_release_info_from_artist(str(artist_id))
-    if len(releases) == 0:
+    if len(releases) <= 5:
         process_artist_releases(artist_id)
     releases = get_release_info_from_artist(str(artist_id))
     print("hre")
@@ -192,6 +435,18 @@ def artist_info():
         all_releases.append(release_dist)
     #print(releases)
     print(row, all_releases)
+    posts = get_posts_from_user_id(artist_id)
+    post_info = []
+    for post in posts:
+        post_info.append({
+            "post_id": post[0],
+            "post_title": post[1],
+            "post_text": post[2],
+            "photo_path": post[3],
+            "time": post[4],
+            "like_amount": post[5],
+            "comment_amount": post[6]
+        })
     return jsonify({
         "id": row[0],
         "name": row[1],
@@ -202,7 +457,8 @@ def artist_info():
         "soundcloud_link": row[6],
         "country": row[7],
         "genre": row[8],
-        "releases": all_releases
+        "releases": all_releases,
+        "posts": post_info
     })
 
 @app.route("/artists", methods=["POST"])
@@ -390,58 +646,9 @@ def get_release_info_page():
     release_dist["comments"] = get_all_release_comments(release_id)
     release_dist["likes"] = get_release_likes(release_id)[0][0]
     return jsonify({"release": release_dist})
-
-#search function
-@app.route("/search", methods=["POST"])
-def search():
-    search_query = request.json.get("search")
-    print(search_query)
-    songs = searchForLikeSongs(search_query)
-    artists = searchForLikeArtists(search_query)
-    users = searchForLikeUsers(search_query)
-    releases = searchForLikeReleases(search_query)
-    playlists = searchForLikePlaylists(search_query)
-    if len(songs) != 0:
-        songs = [{'key':x[0], 'name':x[1]}for x in songs[0]]
-    if len(artists) != 0:
-        artists = [{'key':x[0], 'name':x[1]}for x in artists[0]]
-    if len(users) != 0:
-        print([x[0] for x in users])
-        users = [{'key':x[0], 'name':x[1]} for x in users]
-    if len(releases) != 0:
-        releases = [{'key':x[0], 'name':x[1]}for x in releases[0]]
-    if len(playlists) != 0:
-        playlists = [{'key':x[0], 'name':x[1]}for x in playlists[0]]
-    print(songs)
-    print(artists)
-    print(users)
-    print(releases)
-    print(playlists)
-    return jsonify({"songs": songs, "users": users, "artists": artists, "releases": releases, "playlists": playlists})
-
-@app.route("/search/result", methods=["POST"])
-def getResult():
-    url = None
-    data=request.json
-    print("recieved:data", data)
-    result = data.get("result")
-    type = data.get("type")
-    id = data.get("id")
-    print("proof")
-    if type == "Artist":
-        return url_for('display_artist', artist=result)
-    if type == "Song":
-        return url_for('display_song', song=result)
-    if type == "User":
-        return url_for('display_user', user=result)
-    if type == "Release":
-        return url_for('display_release', release=result)
-    if type == "Playlist":
-        return url_for('display_playlist', playlist=result)
     
 @app.route("/user")
 def display_user():
-
     username = request.args.get("user")
     user_id = get_user_id_by_username(username)
     bio=get_user_bio(username)[0][0]
@@ -466,6 +673,7 @@ def display_user():
         playlist_data['name'] = get_playlist_name(playlist)
         playlist_data['pic'] = get_playlist_pic_path(playlist)
         playlists_data.append(playlist_data)
+    
     return jsonify({"bio": bio, "pfp_path": pfp_path, "fav_artist": fav_artist, "friend_amount": friends, "following_amount": following, "insta_link": insta_link, "spotify_link": spotify_link, "apple_music_link": apple_music_link, "soundcloud_link":soundcloud_link})
 
 @app.route("/home")
@@ -577,6 +785,10 @@ def apple_music_charts():
     #print(data)
     return jsonify({"data": data})
 
+@app.route("/photos/<filename>")
+def serve_photo(filename):
+    return send_from_directory('photos', filename)
+
 @app.route("/dubfinder/upload", methods=["POST"])
 def dubfinder_upload():
     print("dubfinder_upload")
@@ -615,6 +827,56 @@ def dubfinder_upload():
     except Exception as e:
         print(f"Error in dubfinder_upload: {str(e)}")
         return jsonify({"error": "Failed to process file"}), 500
+
+@app.route("/search", methods=["POST"])
+def search_results():
+    data = request.json
+    print("running")
+    search_query = data.get("search")
+    songs = searchForLikeSongs(search_query)
+    print(songs)
+    print("---")
+    artists = searchForLikeArtists(search_query)
+    print(artists)
+    print("-")
+    users = searchForLikeUsers(search_query)
+    print(users)
+    print("---")
+    releases = searchForLikeReleases(search_query)
+    print(releases)
+    print("---")
+    playlists = searchForLikePlaylists(search_query)
+    print(playlists)
+    print("---")
+    posts = searchforLikePosts(search_query)
+    print(posts)
+    print("---")
+    if len(songs) != 0:
+        songs = [{'key':x[0], 'name':get_song_name(x[0])[0][0]}for x in songs]
+    if len(artists) != 0:
+        artists = [{'key':x[0], 'name':x[1]}for x in artists]   
+    if len(users) != 0:
+        users = [{'key':x[0], 'name':x[1]} for x in users]
+    if len(releases) != 0:
+        releases = [{'key':x[0], 'name':get_release_name(x[0])[0][0]}for x in releases]
+    if len(playlists) != 0:
+        playlists = [{'key':x[0], 'name':x[1]}for x in playlists]
+    if len(posts) != 0:
+        posts = [{'post_id':x[0], 'user_id':get_username(x[1])[0][0], 'post_title':x[2], 'post_text':x[3], 'photo_path':x[4], 'time':x[5], 'likes':x[6], 'comments':x[7]}for x in posts]
+    print("\n")
+    print(songs)
+    print("---")
+    print(artists)
+    print("---")
+    print(users)
+    print("---")
+    print(releases)
+    print("---")
+    print(playlists)
+    print("---")
+    print(posts)
+    print("---")
+    return jsonify({"songs": songs, "artists": artists, "users": users, "releases": releases, "playlists": playlists, "posts": posts})
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -19,6 +19,9 @@ import DisplayRelease from "./DisplayRelease";
 import DubFinder from "./DubFinder";
 import AppleMusicCharts from "./AppleMusicCharts";
 import UserAccount from "./UserAccount";
+import ViewOtherAccount from "./ViewOtherAccount";
+import PostView from "./PostView";
+import SearchResults from "./SearchResults";
 import { UserProvider } from "./userContext";
 import TopBar from "./TopBar";
 
@@ -42,9 +45,11 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/login" element={<Login />} />
-            <Route path="/account" element={<Account />} />
+            <Route path="/account" element={<UserAccount />} />
             <Route path="/search" element={<Search />} />
             <Route path="/user" element={<User />} />
+            <Route path="/user/:userId" element={<ViewOtherAccount />} />
+            <Route path="/post/:postId" element={<PostView />} />
             <Route path="/songs" element={<Songs />} />
             <Route path="/artists" element={<Artists />} />
             <Route path="/playlists" element={<Playlists />} />
@@ -54,11 +59,11 @@ function App() {
             <Route path="/charts/billboard/global-200" element={<Global200Chart />} />
             <Route path="/charts/spotify" element={<SpotifyCharts />} />
             <Route path="/charts/applemusic" element={<AppleMusicCharts />} />
-            <Route path="/account" element={<UserAccount />} />
             <Route path="/artist/:id" element={<DisplayArtist />} />
             <Route path="/song/info/:id" element={<DisplaySong />} />
             <Route path="/release/info/:id" element={<DisplayRelease />} />
             <Route path="/dubfinder" element={<DubFinder />} />
+            <Route path="/search-results" element={<SearchResults />} />
           </Route>
         </Routes>
       </UserProvider>

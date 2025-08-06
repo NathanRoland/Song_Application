@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import './SearchBar.css';
 
@@ -9,6 +10,7 @@ const SearchBar = () => {
   const [loading, setLoading] = useState(false);
   const [expandedSections, setExpandedSections] = useState({});
   const searchRef = useRef(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -74,6 +76,20 @@ const SearchBar = () => {
     }
   };
 
+  const handleSearchButtonClick = () => {
+    if (searchQuery.trim()) {
+      navigate(`/search-results?q=${encodeURIComponent(searchQuery.trim())}`);
+      setIsSearchOpen(false);
+    }
+  };
+
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter' && searchQuery.trim()) {
+      navigate(`/search-results?q=${encodeURIComponent(searchQuery.trim())}`);
+      setIsSearchOpen(false);
+    }
+  };
+
   const handleSeeMore = (section) => {
     if (!searchResults) return;
 
@@ -113,11 +129,44 @@ const SearchBar = () => {
     return titles[section] || section;
   };
 
+  const handleItemClick = (item, section) => {
+    switch (section) {
+      case 'songs':
+        navigate(`/song/info/${item.key}`);
+        break;
+      case 'artists':
+        navigate(`/artist/${item.key}`);
+        break;
+      case 'users':
+        navigate(`/user/${item.key}`);
+        break;
+      case 'releases':
+        navigate(`/release/info/${item.key}`);
+        break;
+      case 'playlists':
+        // For now, navigate to playlists page since individual playlist route might not exist
+        navigate('/playlists');
+        break;
+      case 'posts':
+        // For posts, we might want to show the post in a modal or navigate to a post view
+        // For now, let's navigate to the home page since posts are displayed there
+        navigate('/');
+        break;
+      default:
+        break;
+    }
+    setIsSearchOpen(false);
+  };
+
   const renderResultItem = (item, section) => {
     switch (section) {
       case 'posts':
         return (
-          <div key={item.post_id} className="search-result-item post-item">
+          <div 
+            key={item.post_id} 
+            className="search-result-item post-item clickable"
+            onClick={() => handleItemClick(item, section)}
+          >
             <div className="result-icon">📰</div>
             <div className="result-content">
               <div className="result-title">{item.post_title}</div>
@@ -128,7 +177,11 @@ const SearchBar = () => {
         );
       default:
         return (
-          <div key={item.key} className="search-result-item">
+          <div 
+            key={item.key} 
+            className="search-result-item clickable"
+            onClick={() => handleItemClick(item, section)}
+          >
             <div className="result-icon">{getSectionIcon(section)}</div>
             <div className="result-content">
               <div className="result-title">{item.name}</div>
@@ -146,8 +199,16 @@ const SearchBar = () => {
           placeholder="Search songs, artists, users, posts..."
           value={searchQuery}
           onChange={handleInputChange}
+          onKeyPress={handleKeyPress}
           className="search-input"
         />
+        <button
+          className="search-button"
+          onClick={handleSearchButtonClick}
+          disabled={!searchQuery.trim()}
+        >
+          🔍
+        </button>
         {loading && <div className="search-spinner"></div>}
       </div>
 

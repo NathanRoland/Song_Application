@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useUser } from './userContext';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import PostModal from './PostModal';
 import './Feed.css';
 
 const Feed = () => {
   const { user } = useUser();
+  const navigate = useNavigate();
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [selectedPostId, setSelectedPostId] = useState(null);
-  const [isPostModalOpen, setIsPostModalOpen] = useState(false);
+
 
   useEffect(() => {
     if (user) {
@@ -33,16 +33,10 @@ const Feed = () => {
   };
 
   const handleViewPost = (postId) => {
-    setSelectedPostId(postId);
-    setIsPostModalOpen(true);
+    navigate(`/post/${postId}`);
   };
 
-  const handleClosePostModal = () => {
-    setIsPostModalOpen(false);
-    setSelectedPostId(null);
-    // Refresh feed after viewing post
-    fetchFeed();
-  };
+
 
   const handleLikePost = async (postId) => {
     try {
@@ -164,12 +158,6 @@ const Feed = () => {
         </div>
       )}
 
-      {/* Post Modal for viewing posts */}
-      <PostModal 
-        isOpen={isPostModalOpen}
-        onClose={handleClosePostModal}
-        postId={selectedPostId}
-      />
     </div>
   );
 };

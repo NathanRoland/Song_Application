@@ -119,7 +119,7 @@ def get_release_details_musicbrainz(release_id, is_album, is_EP, is_Song):
     name = release["title"]
     artist_credits = release["artist-credit"]
     artists = [None, None, None, None]
-    for i in range(len(artist_credits)):
+    for i in range(min(len(artist_credits), 4)):
         artists[i] = artist_credits[i]["artist"]["id"]
     #print(artists)
 
