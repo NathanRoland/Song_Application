@@ -209,6 +209,12 @@ def change_dob(username: str, dob: DateTime):
         session.execute(update(User).where(User.username == username).values(date_of_birth=dob))
         session.commit()
 
+def add_friend_request(username_1: str, username2: str):
+    with Session(engine) as session:
+        friend_request = FriendRequest(username_sent=username_1, username_recieved=username2, combined_username_key=username_1 + username2)
+        session.add(friend_request)
+        session.commit()
+
 def get_friend_request(combined_username_key: str):
     with Session(engine) as session:
         return session.get(FriendRequest, combined_username_key)
@@ -258,3 +264,46 @@ def remove_friend(combined_username_key: str):
 def get_user_following(username: str):
     with Session(engine) as session:
         return session.execute(select(Following.artist).where(Following.username==username)).all()
+
+def get_received_friend_requests(username: str):
+    """Get all friend requests received by a user"""
+    with Session(engine) as session:
+        return session.execute(select(FriendRequest.username_sent, FriendRequest.username_recieved, FriendRequest.combined_username_key).where(FriendRequest.username_recieved == username)).all()
+
+def get_sent_friend_requests(username: str):
+    """Get all friend requests sent by a user"""
+    with Session(engine) as session:
+        return session.execute(select(FriendRequest.username_sent, FriendRequest.username_recieved, FriendRequest.combined_username_key).where(FriendRequest.username_sent == username)).all()
+
+def check_if_friends(username1: str, username2: str):
+    """Check if two users are friends"""
+    with Session(engine) as session:
+        # Check both combinations of the friendship
+        friendship1 = session.execute(select(Friendships).where(Friendships.combined_username_key == username1 + username2)).first()
+        friendship2 = session.execute(select(Friendships).where(Friendships.combined_username_key == username2 + username1)).first()
+        return friendship1 is not None or friendship2 is not None
+
+def check_friend_request_status(username1: str, username2: str):
+    """Check the status of friend request between two users"""
+    with Session(engine) as session:
+        # Check if they are already friends
+        if check_if_friends(username1, username2):
+            return "friends"
+        
+        # Check if there's a pending request from username1 to username2
+        sent_request = session.execute(select(FriendRequest).where(
+            (FriendRequest.username_sent == username1) & (FriendRequest.username_recieved == username2)
+        )).first()
+        
+        if sent_request:
+            return "request_sent"
+        
+        # Check if there's a pending request from username2 to username1
+        received_request = session.execute(select(FriendRequest).where(
+            (FriendRequest.username_sent == username2) & (FriendRequest.username_recieved == username1)
+        )).first()
+        
+        if received_request:
+            return "request_received"
+        
+        return "no_request"

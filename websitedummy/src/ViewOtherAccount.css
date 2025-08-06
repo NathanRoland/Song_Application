@@ -40,6 +40,92 @@
   transform: translateY(-2px);
 }
 
+.add-friend-button:disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.friend-button-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.remove-request-button {
+  padding: 12px 24px;
+  background: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.remove-request-button:hover {
+  background: #5a6268;
+  transform: translateY(-2px);
+}
+
+.friend-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.accept-friend-button {
+  padding: 12px 24px;
+  background: #28a745;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.accept-friend-button:hover {
+  background: #218838;
+  transform: translateY(-2px);
+}
+
+.reject-friend-button {
+  padding: 12px 24px;
+  background: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.reject-friend-button:hover {
+  background: #c82333;
+  transform: translateY(-2px);
+}
+
+.friends-button {
+  padding: 12px 24px;
+  background: #17a2b8;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: not-allowed;
+  transition: all 0.3s ease;
+}
+
+.friends-button:disabled {
+  background: #17a2b8;
+  cursor: not-allowed;
+  transform: none;
+}
+
 .account-content {
   display: flex;
   flex-direction: column;
@@ -310,7 +396,12 @@
     grid-template-columns: 1fr;
   }
 
-  .add-friend-button {
+  .add-friend-button, .remove-request-button, .accept-friend-button, .reject-friend-button, .friends-button {
+    width: 100%;
+  }
+  
+  .friend-actions {
+    flex-direction: column;
     width: 100%;
   }
 }

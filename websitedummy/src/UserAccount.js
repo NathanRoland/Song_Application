@@ -10,10 +10,16 @@ const UserAccount = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [editForm, setEditForm] = useState({});
+  const [friendRequests, setFriendRequests] = useState({ received: [], sent: [] });
+  const [friendRequestsLoading, setFriendRequestsLoading] = useState(false);
+  const [friendRequestsError, setFriendRequestsError] = useState(null);
+  const [friends, setFriends] = useState([]);
+  const [friendsLoading, setFriendsLoading] = useState(false);
 
   useEffect(() => {
-    if (user) {
+    if (user && user !== '') {
       fetchUserInfo();
+      // fetchFriendRequests(); // Commented out since we get friend requests from main account endpoint
     }
   }, [user]);
 
@@ -27,10 +33,45 @@ const UserAccount = () => {
       console.log('Account response:', response.data);
       setUserInfo(response.data);
       setEditForm(response.data.user_info);
+      
+      // Set friends and friend requests from the response
+      if (response.data.friends) {
+        setFriends(response.data.friends);
+      }
+      if (response.data.friend_requests) {
+        setFriendRequests({
+          received: response.data.friend_requests,
+          sent: [] // The backend doesn't return sent requests in this endpoint
+        });
+      }
     } catch (err) {
       setError('Failed to load user information');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchFriendRequests = async () => {
+    try {
+      setFriendRequestsLoading(true);
+      setFriendRequestsError(null);
+      
+      const userId = typeof user === 'object' && user.id ? user.id : user;
+      if (!userId) {
+        throw new Error('No valid user ID');
+      }
+      
+      const response = await axios.post('http://127.0.0.1:5000/account/friend_requests', {
+        user_id: userId
+      });
+      setFriendRequests(response.data);
+    } catch (err) {
+      console.error('Failed to load friend requests:', err);
+      setFriendRequestsError('Failed to load friend requests');
+      // Set default empty state to prevent undefined errors
+      setFriendRequests({ received: [], sent: [] });
+    } finally {
+      setFriendRequestsLoading(false);
     }
   };
 
@@ -67,6 +108,93 @@ const UserAccount = () => {
       ...prev,
       [field]: value
     }));
+  };
+
+  const handleAcceptFriendRequest = async (username) => {
+    try {
+      const currentUserId = typeof user === 'object' && user.id ? user.id : user;
+      const friendUserId = await getUserIdByUsername(username);
+      
+      if (!friendUserId) {
+        alert('Could not find user');
+        return;
+      }
+      
+      await axios.post('http://127.0.0.1:5000/account/view/accept_friend', {
+        user_id: currentUserId,
+        friend_id: friendUserId
+      });
+      
+      // Refresh user info to get updated friends and friend requests
+      await fetchUserInfo();
+      alert('Friend request accepted!');
+    } catch (err) {
+      alert('Failed to accept friend request');
+    }
+  };
+
+  const handleRejectFriendRequest = async (username) => {
+    try {
+      const currentUserId = typeof user === 'object' && user.id ? user.id : user;
+      const friendUserId = await getUserIdByUsername(username);
+      
+      if (!friendUserId) {
+        alert('Could not find user');
+        return;
+      }
+      
+      await axios.post('http://127.0.0.1:5000/account/view/reject_friend', {
+        user_id: currentUserId,
+        friend_id: friendUserId
+      });
+      
+      // Refresh user info to get updated friends and friend requests
+      await fetchUserInfo();
+      alert('Friend request rejected');
+    } catch (err) {
+      alert('Failed to reject friend request');
+    }
+  };
+
+  const handleRemoveSentRequest = async (username) => {
+    try {
+      const currentUserId = typeof user === 'object' && user.id ? user.id : user;
+      const friendUserId = await getUserIdByUsername(username);
+      
+      if (!friendUserId) {
+        alert('Could not find user');
+        return;
+      }
+      
+      await axios.post('http://127.0.0.1:5000/account/remove_sent_request', {
+        user_id: currentUserId,
+        friend_id: friendUserId
+      });
+      
+      // Refresh user info to get updated friends and friend requests
+      await fetchUserInfo();
+      alert('Friend request removed');
+    } catch (err) {
+      alert('Failed to remove friend request');
+    }
+  };
+
+  const getUserIdByUsername = async (username) => {
+    try {
+      const response = await axios.post('http://127.0.0.1:5000/account/get_user_id_by_username', {
+        username: username
+      });
+      return response.data.user_id;
+    } catch (err) {
+      console.error('Failed to get user ID:', err);
+      return null;
+    }
+  };
+
+  const handleViewFriendProfile = (username) => {
+    // Navigate to the friend's profile page
+    // This would typically use React Router navigation
+    window.location.href = `/user/${username}`;
   };
 
   if (!user) {
@@ -303,6 +431,103 @@ const UserAccount = () => {
             </div>
           </div>
         </div>
+
+        {/* Friends Section */}
+        {user && (
+          <div className="friends-section">
+            <h3>👥 My Friends ({friends?.length || 0})</h3>
+            {friends?.length > 0 ? (
+              <div className="friends-list">
+                {friends.map((friend, index) => (
+                  <div key={index} className="friend-item">
+                    <span className="friend-username">{friend.username}</span>
+                    <div className="friend-actions">
+                      <button 
+                        onClick={() => handleViewFriendProfile(friend.username)}
+                        className="view-profile-button"
+                      >
+                        👤 View Profile
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="no-friends">You don't have any friends yet. Start connecting with other users!</p>
+            )}
+          </div>
+        )}
+
+        {/* Friend Requests Section */}
+        {user && (
+          <div className="friend-requests-section">
+            <h3>👥 Friend Requests</h3>
+            
+            {friendRequestsLoading ? (
+              <div className="loading-spinner"></div>
+            ) : friendRequestsError ? (
+              <div className="error-message">
+                <p>{friendRequestsError}</p>
+              </div>
+            ) : (
+              <div className="friend-requests-content">
+                {/* Received Friend Requests */}
+                <div className="received-requests">
+                  <h4>📥 Received Requests ({friendRequests?.received?.length || 0})</h4>
+                  {friendRequests?.received?.length > 0 ? (
+                    <div className="requests-list">
+                      {friendRequests.received.map((request, index) => (
+                        <div key={index} className="request-item">
+                          <span className="request-username">{request.username}</span>
+                          <div className="request-actions">
+                            <button 
+                              onClick={() => handleAcceptFriendRequest(request.username)}
+                              className="accept-button"
+                            >
+                              ✅ Accept
+                            </button>
+                            <button 
+                              onClick={() => handleRejectFriendRequest(request.username)}
+                              className="reject-button"
+                            >
+                              ❌ Reject
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="no-requests">No received friend requests</p>
+                  )}
+                </div>
+
+                {/* Sent Friend Requests */}
+                <div className="sent-requests">
+                  <h4>📤 Sent Requests ({friendRequests?.sent?.length || 0})</h4>
+                  {friendRequests?.sent?.length > 0 ? (
+                    <div className="requests-list">
+                      {friendRequests.sent.map((request, index) => (
+                        <div key={index} className="request-item">
+                          <span className="request-username">{request.username}</span>
+                          <div className="request-actions">
+                            <button 
+                              onClick={() => handleRemoveSentRequest(request.username)}
+                              className="remove-button"
+                            >
+                              🗑️ Remove Request
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="no-requests">No sent friend requests</p>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Posts Section */}
         {userInfo?.posts && userInfo.posts.length > 0 && (

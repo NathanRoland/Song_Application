@@ -11,12 +11,19 @@ const ViewOtherAccount = () => {
   const [userInfo, setUserInfo] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [friendStatus, setFriendStatus] = useState('loading');
 
   useEffect(() => {
     if (userId) {
       fetchUserInfo();
     }
   }, [userId]);
+
+  useEffect(() => {
+    if (user && userId) {
+      checkFriendStatus();
+    }
+  }, [user, userId]);
 
   const fetchUserInfo = async () => {
     try {
@@ -32,6 +39,22 @@ const ViewOtherAccount = () => {
     }
   };
 
+  const checkFriendStatus = async () => {
+    if (!user || !userId) return;
+    
+    try {
+      const currentUserId = typeof user === 'string' ? user : user.id || user;
+      const response = await axios.post('http://127.0.0.1:5000/account/check_friend_status', {
+        user_id: currentUserId,
+        other_user_id: userId
+      });
+      setFriendStatus(response.data.status);
+    } catch (err) {
+      console.error('Failed to check friend status:', err);
+      setFriendStatus('error');
+    }
+  };
+
   const handleAddFriend = async () => {
     if (!user) {
       alert('Please log in to add friends');
@@ -44,9 +67,62 @@ const ViewOtherAccount = () => {
         user_id: currentUserId,
         friend_id: userId
       });
-      alert('Friend added successfully!');
+      // Refresh friend status
+      await checkFriendStatus();
+      alert('Friend request sent!');
     } catch (err) {
-      alert('Failed to add friend');
+      alert('Failed to send friend request');
+    }
+  };
+
+  const handleAcceptRequest = async () => {
+    if (!user) return;
+
+    try {
+      const currentUserId = typeof user === 'string' ? user : user.id || user;
+      await axios.post('http://127.0.0.1:5000/account/view/accept_friend', {
+        user_id: currentUserId,
+        friend_id: userId
+      });
+      // Refresh friend status
+      await checkFriendStatus();
+      alert('Friend request accepted!');
+    } catch (err) {
+      alert('Failed to accept friend request');
+    }
+  };
+
+  const handleRejectRequest = async () => {
+    if (!user) return;
+
+    try {
+      const currentUserId = typeof user === 'string' ? user : user.id || user;
+      await axios.post('http://127.0.0.1:5000/account/view/reject_friend', {
+        user_id: currentUserId,
+        friend_id: userId
+      });
+      // Refresh friend status
+      await checkFriendStatus();
+      alert('Friend request rejected');
+    } catch (err) {
+      alert('Failed to reject friend request');
+    }
+  };
+
+  const handleRemoveRequest = async () => {
+    if (!user) return;
+
+    try {
+      const currentUserId = typeof user === 'string' ? user : user.id || user;
+      await axios.post('http://127.0.0.1:5000/account/remove_sent_request', {
+        user_id: currentUserId,
+        friend_id: userId
+      });
+      // Refresh friend status
+      await checkFriendStatus();
+      alert('Friend request removed');
+    } catch (err) {
+      alert('Failed to remove friend request');
     }
   };
 
@@ -86,9 +162,43 @@ const ViewOtherAccount = () => {
       <div className="account-header">
         <h1>👤 {userInfo.user_info.username}'s Profile</h1>
         {!isCurrentUser && user && (
-          <button onClick={handleAddFriend} className="add-friend-button">
-            👥 Add Friend
-          </button>
+          <div className="friend-button-container">
+            {friendStatus === 'loading' && (
+              <button className="add-friend-button" disabled>
+                Loading...
+              </button>
+            )}
+            {friendStatus === 'no_request' && (
+              <button onClick={handleAddFriend} className="add-friend-button">
+                👥 Add Friend
+              </button>
+            )}
+            {friendStatus === 'request_sent' && (
+              <button onClick={handleRemoveRequest} className="remove-request-button">
+                📤 Request Sent
+              </button>
+            )}
+            {friendStatus === 'request_received' && (
+              <div className="friend-actions">
+                <button onClick={handleAcceptRequest} className="accept-friend-button">
+                  ✅ Accept
+                </button>
+                <button onClick={handleRejectRequest} className="reject-friend-button">
+                  ❌ Reject
+                </button>
+              </div>
+            )}
+            {friendStatus === 'friends' && (
+              <button className="friends-button" disabled>
+                👥 Friends
+              </button>
+            )}
+            {friendStatus === 'error' && (
+              <button onClick={handleAddFriend} className="add-friend-button">
+                👥 Add Friend
+              </button>
+            )}
+          </div>
         )}
       </div>
 

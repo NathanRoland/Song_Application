@@ -280,67 +280,194 @@ def view_other_account():
             "time": post[4],
             "like_amount": post[5],
             "comment_amount": post[6]
-        })  
+        })
+
     return jsonify({"user_info": user_info, "posts": post_info})
 
 @app.route("/account/view/add_friend", methods=["POST"])
-def add_friend():
+def add_friend_from_account():
     data = request.json
     user_id = data.get("user_id")
     friend_id = data.get("friend_id")
-    add_friend(user_id, friend_id)
+    username_1 = get_username(user_id)[0][0]
+    username_2 = get_username(friend_id)[0][0]
+    add_friend_request(username_1, username_2)
+    return jsonify({"success": True, "message": "Friend request sent successfully"})
+
+@app.route("/account/view/accept_friend", methods=["POST"])
+def accept_friend():
+    data = request.json
+    user_id = data.get("user_id")
+    friend_id = data.get("friend_id")
+    username_1 = get_username(user_id)[0][0]
+    username_2 = get_username(friend_id)[0][0]
+    remove_friend_request(username_1 + username_2)
+    add_friend(username_1, username_2, username_1 + username_2)
     return jsonify({"success": True, "message": "Friend added successfully"})
+
+@app.route("/account/view/reject_friend", methods=["POST"])
+def reject_friend():
+    data = request.json
+    user_id = data.get("user_id")
+    friend_id = data.get("friend_id")
+    username_1 = get_username(user_id)[0][0]
+    username_2 = get_username(friend_id)[0][0]
+    remove_friend_request(username_1 + username_2)
+    return jsonify({"success": True, "message": "Friend request rejected successfully"})
+
+@app.route("/account/friend_requests", methods=["POST"])
+def get_friend_requests():
+    data = request.json
+    user_id = data.get("user_id")
+    username = get_username(user_id)[0][0]
+    
+    # Get received friend requests
+    received_requests = get_received_friend_requests(username)
+    received_info = []
+    for req in received_requests:
+        received_info.append({
+            "username": req[0],
+            "combined_key": req[2]
+        })
+    
+    # Get sent friend requests
+    sent_requests = get_sent_friend_requests(username)
+    sent_info = []
+    for req in sent_requests:
+        sent_info.append({
+            "username": req[1],
+            "combined_key": req[2]
+        })
+    
+    return jsonify({
+        "received_requests": received_info,
+        "sent_requests": sent_info
+    })
+
+@app.route("/account/check_friend_status", methods=["POST"])
+def check_friend_status():
+    data = request.json
+    user_id = data.get("user_id")
+    other_user_id = data.get("other_user_id")
+    
+    username1 = get_username(user_id)[0][0]
+    username2 = get_username(other_user_id)[0][0]
+    
+    status = check_friend_request_status(username1, username2)
+    
+    return jsonify({"status": status})
+
+@app.route("/account/remove_sent_request", methods=["POST"])
+def remove_sent_request():
+    data = request.json
+    user_id = data.get("user_id")
+    friend_id = data.get("friend_id")
+    username_1 = get_username(user_id)[0][0]
+    username_2 = get_username(friend_id)[0][0]
+    remove_friend_request(username_1 + username_2)
+    return jsonify({"success": True, "message": "Friend request removed successfully"})
+
+@app.route("/account/get_user_id_by_username", methods=["POST"])
+def get_user_id_by_username_endpoint():
+    data = request.json
+    username = data.get("username")
+    try:
+        user_id = get_user_id_by_username(username)
+        return jsonify({"user_id": user_id})
+    except ValueError:
+        return jsonify({"error": "User not found"}), 404
 
 @app.route("/account", methods=["POST"])
 def display_account():
     print("account")
-    data=request.json
-    name=data.get('name')
-    user_id = data.get('id')
-    if_artist = check_if_artist(user_id)[0][0]
-    print(if_artist)
-    user_info = {}
-    if if_artist != None:
-        result = get_user_artist(user_id)[0]
-        user_info = {
-            "username": result[0],
-            "bio": result[1],
-            "pfp_path": result[2],
-            "insta_link": result[3],
-            "spotify_link": result[4],
-            "apple_music_link": result[5],
-            "soundcloud_link": result[6]
-        }
-        is_artist = True
-    else:
-        result = get_user_non_artist(user_id)[0]
-        user_info = {
-            "username": result[0],
-            "bio": result[1],
-            "pfp_path": result[2],
-            "fav_artist": result[3],
-            "fav_song": result[4],
-            "insta_link": result[5],
-            "spotify_link": result[6],
-            "apple_music_link": result[7],
-            "soundcloud_link": result[8]
-        }
-        is_artist = False
-    posts = get_posts_from_user_id(user_id)
-    print(posts)
-    post_info = []
-    for post in posts:
-        post_info.append({
-            "post_id": post[0],
-            "post_title": post[1],
-            "post_text": post[2],
-            "photo_path": post[3],
-            "time": post[4],
-            "like_amount": post[5],
-            "comment_amount": post[6]
+    try:
+        if not request.is_json:
+            return jsonify({"error": "Request must be JSON"}), 400
+        
+        data = request.json
+        if not data:
+            return jsonify({"error": "No data provided"}), 400
+        
+        name = data.get('name')
+        user_id = data.get('id')
+        
+        if not name or not user_id:
+            return jsonify({"error": "Missing required fields: name and id"}), 400
+        
+        if_artist = check_if_artist(user_id)[0][0]
+        print(if_artist)
+        user_info = {}
+        
+        if if_artist != None:
+            result = get_user_artist(user_id)[0]
+            user_info = {
+                "username": result[0],
+                "bio": result[1],
+                "pfp_path": result[2],
+                "insta_link": result[3],
+                "spotify_link": result[4],
+                "apple_music_link": result[5],
+                "soundcloud_link": result[6]
+            }
+            is_artist = True
+        else:
+            result = get_user_non_artist(user_id)[0]
+            user_info = {
+                "username": result[0],
+                "bio": result[1],
+                "pfp_path": result[2],
+                "fav_artist": result[3],
+                "fav_song": result[4],
+                "insta_link": result[5],
+                "spotify_link": result[6],
+                "apple_music_link": result[7],
+                "soundcloud_link": result[8]
+            }
+            is_artist = False
+        
+        posts = get_posts_from_user_id(user_id)
+        print(posts)
+        post_info = []
+        for post in posts:
+            post_info.append({
+                "post_id": post[0],
+                "post_title": post[1],
+                "post_text": post[2],
+                "photo_path": post[3],
+                "time": post[4],
+                "like_amount": post[5],
+                "comment_amount": post[6]
+            })
+        
+        friends = return_friends(name)
+        friend_info = []
+        for friend in friends:
+            friend_info.append({
+                "username": friend,
+                "combined_key": None  # return_friends only returns usernames, not combined keys
+            })
+        
+        friend_requests = get_friend_request(name)
+        friend_request_info = []
+        for friend_request in friend_requests:
+            if len(friend_request) >= 2:  # Ensure request has at least 2 elements
+                friend_request_info.append({
+                    "username": friend_request[0],
+                    "combined_key": friend_request[1]
+                })
+        
+        print(post_info)
+        return jsonify({
+            "user_info": user_info, 
+            "is_artist": is_artist, 
+            "posts": post_info, 
+            "friends": friend_info, 
+            "friend_requests": friend_request_info
         })
-    print(post_info)
-    return jsonify({"user_info": user_info, "is_artist": is_artist, "posts": post_info})
+        
+    except Exception as e:
+        print(f"Error in display_account: {str(e)}")
+        return jsonify({"error": "Failed to load account information"}), 500
 
 @app.route("/account/edit", methods=["POST"])
 def edit_account():
