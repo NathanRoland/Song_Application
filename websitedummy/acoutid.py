@@ -6,6 +6,8 @@ import os
 import tempfile
 from music_data import *
 from song import *
+from pydub import AudioSegment
+import shutil
 
 def convert_to_fingerpint(file_path):
     try:
@@ -172,4 +174,154 @@ def format_audd_result(result):
     if lyrics:
         track_info["lyrics"] = lyrics
     return track_info
+
+def split_audio(file_path, segment_duration, step):
+    try:
+        # Check if file exists
+        if not os.path.exists(file_path):
+            print(f"Error: File {file_path} does not exist")
+            return []
+        
+        # Check if file is readable
+        if not os.access(file_path, os.R_OK):
+            print(f"Error: File {file_path} is not readable")
+            return []
+        
+        # Check file size
+        file_size = os.path.getsize(file_path)
+        if file_size == 0:
+            print(f"Error: File {file_path} is empty")
+            return []
+        
+        print(f"Loading audio file: {file_path} (size: {file_size} bytes)")
+        audio = AudioSegment.from_file(file_path)
+        
+        if len(audio) == 0:
+            print("Error: Audio file has no content")
+            return []
+        
+        print(f"Audio loaded successfully. Duration: {len(audio)}ms")
+        segments = []
+        for start in range(0, len(audio) - segment_duration + 1, step):
+            segment = audio[start:start + segment_duration]
+            segments.append(segment)
+        
+        print(f"Created {len(segments)} segments")
+        return segments
+        
+    except Exception as e:
+        print(f"Error in split_audio: {str(e)}")
+        return []
+
+def convert_setlist_to_file(url, type):
+    try:
+        temp_dir = tempfile.mkdtemp()
+        output_template = os.path.join(temp_dir, "%(title)s.%(ext)s")
+        cmd = [
+            "yt-dlp",
+            "-x",
+            "--audio-format", "mp3",
+            "-o", output_template,
+            url
+        ]
+
+        print(f"Downloading from {type}: {url}")
+        result = subprocess.run(cmd, check=True, capture_output=True, text=True)
+        
+        if result.returncode != 0:
+            print(f"yt-dlp failed with return code {result.returncode}")
+            print(f"stderr: {result.stderr}")
+            shutil.rmtree(temp_dir)
+            return None, None
+        
+        downloaded_files = [os.path.join(temp_dir, f) for f in os.listdir(temp_dir) if f.endswith('.mp3')]
+        
+        if not downloaded_files:
+            print("No MP3 files found in downloaded directory")
+            shutil.rmtree(temp_dir)
+            return None, None
+        
+        print(f"Downloaded {len(downloaded_files)} file(s): {downloaded_files}")
+        
+        # Return the first MP3 file found
+        return downloaded_files[0], temp_dir
+        
+    except subprocess.CalledProcessError as e:
+        print(f"Error downloading audio from {type}: {e}")
+        print(f"Command output: {e.stdout}")
+        print(f"Command error: {e.stderr}")
+        if os.path.exists(temp_dir):
+            shutil.rmtree(temp_dir)
+        return None, None
+    except Exception as e:
+        print(f"Unexpected error downloading from {type}: {str(e)}")
+        if os.path.exists(temp_dir):
+            shutil.rmtree(temp_dir)
+        return None, None
+    
+
+def get_setlist(link):
+    try:
+        file_path = None
+        if "soundcloud.com" in link:
+            file_path = convert_setlist_to_file(link, "soundcloud")
+        elif "youtube.com" in link or "youtu.be" in link:
+            file_path = convert_setlist_to_file(link, "youtube")
+        else:
+            print("not a valid link")
+            return []
+        
+        if file_path is None or file_path[0] is None:
+            print("Error: Failed to download audio file")
+            return []
+        
+        file_path_of_setlist = file_path[0]
+        directory_of_setlist = file_path[1]
+        
+        print(f"Processing audio file: {file_path_of_setlist}")
+        
+        segments = split_audio(file_path_of_setlist, segment_duration=60000, step=60000)
+        
+        if not segments:
+            print("Error: No audio segments created")
+            if directory_of_setlist and os.path.exists(directory_of_setlist):
+                shutil.rmtree(directory_of_setlist)
+            return []
+        
+        tracks = []
+        seen_ids = set()
+        
+        for idx, segment in enumerate(segments):
+            try:
+                segment_file = f"segment_{idx}.mp3"
+                segment.export(segment_file, format="mp3")
+                print(f"analysing segment: {idx}")
+                track_info = recognize_song(segment_file)
+                print(track_info)
+                
+                if track_info:
+                    song_id = track_info.get("musicbrainz_id")
+                    if song_id and song_id not in seen_ids:
+                        seen_ids.add(song_id)
+                        tracks.append(track_info)
+                
+                # Clean up segment file
+                if os.path.exists(segment_file):
+                    os.remove(segment_file)
+                    
+            except Exception as e:
+                print(f"Error processing segment {idx}: {str(e)}")
+                continue
+        
+        print(f"Found {len(tracks)} tracks")
+        
+        # Clean up directory
+        if directory_of_setlist and os.path.exists(directory_of_setlist):
+            shutil.rmtree(directory_of_setlist)
+        
+        return tracks
+        
+    except Exception as e:
+        print(f"Error in get_setlist: {str(e)}")
+        return []
 

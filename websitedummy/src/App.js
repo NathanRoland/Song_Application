@@ -17,6 +17,7 @@ import DisplayArtist from "./DisplayArtist";
 import DisplaySong from "./DisplaySong";
 import DisplayRelease from "./DisplayRelease";
 import DubFinder from "./DubFinder";
+import DubFinderSetlist from "./DubFinderSetlist";
 import AppleMusicCharts from "./AppleMusicCharts";
 import UserAccount from "./UserAccount";
 import ViewOtherAccount from "./ViewOtherAccount";
@@ -63,6 +64,7 @@ function App() {
             <Route path="/song/info/:id" element={<DisplaySong />} />
             <Route path="/release/info/:id" element={<DisplayRelease />} />
             <Route path="/dubfinder" element={<DubFinder />} />
+            <Route path="/dubfinder/setlist" element={<DubFinderSetlist />} />
             <Route path="/search-results" element={<SearchResults />} />
           </Route>
         </Routes>

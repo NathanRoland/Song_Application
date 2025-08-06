@@ -99,6 +99,10 @@ const DubFinder = () => {
       <div className="dubfinder-header">
         <h1>🎵 DubFinder</h1>
         <p>Upload an audio file to identify the song and get detailed information</p>
+        <div className="dubfinder-nav">
+          <a href="/dubfinder" className="nav-link active">🎵 Single Track</a>
+          <a href="/dubfinder/setlist" className="nav-link">🎧 Setlist Analysis</a>
+        </div>
       </div>
 
       <div className="upload-section">

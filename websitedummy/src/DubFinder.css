@@ -25,7 +25,38 @@
 .dubfinder-header p {
   font-size: 1.1rem;
   color: #666;
-  margin: 0;
+  margin: 0 0 20px 0;
+}
+
+.dubfinder-nav {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.nav-link {
+  padding: 10px 20px;
+  background: #f8f9fa;
+  color: #666;
+  text-decoration: none;
+  border-radius: 8px;
+  border: 2px solid #e9ecef;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+}
+
+.nav-link:hover {
+  background: #e9ecef;
+  color: #333;
+  transform: translateY(-1px);
+}
+
+.nav-link.active {
+  background: linear-gradient(135deg, #1db954 0%, #1ed760 100%);
+  color: white;
+  border-color: #1db954;
 }
 
 .upload-section {
