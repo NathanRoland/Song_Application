@@ -80,7 +80,7 @@ function Search() {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
             />
-            <button onClick={sendDataToFlask}>Submit</button>
+            <button onClick={fetchData}>Submit</button>
         </div>
 
    

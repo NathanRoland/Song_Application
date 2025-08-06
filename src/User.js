@@ -1,10 +1,10 @@
 import { useUser } from "./userContext";
-
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
 function User() {
+  const { user } = useUser(); // Get user from context
   const [name, setName] = useState([]);
     const [bio, setBio] = useState([]);
     const [pfp_path, setPfpPath] = useState([]);
