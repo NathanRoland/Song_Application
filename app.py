@@ -25,24 +25,82 @@ import datetime
 from dotenv import load_dotenv
 
 app = Flask(__name__)
-CORS(app, origins=[
-    "https://song-application.vercel.app",
-    "https://song-application-p2ab.onrender.com", 
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-    "http://localhost:5000",
-    "http://127.0.0.1:5000",
-    "http://localhost",
-    "http://127.0.0.1"
-], supports_credentials=True, methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"])
+
+# Configure CORS properly
+CORS(app, 
+     origins=[
+         "https://song-application.vercel.app",
+         "https://song-application-p2ab.onrender.com", 
+         "http://localhost:3000",
+         "http://127.0.0.1:3000",
+         "http://localhost:5000",
+         "http://127.0.0.1:5000",
+         "http://localhost",
+         "http://127.0.0.1"
+     ], 
+     supports_credentials=True, 
+     methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+     allow_headers=["Content-Type", "Authorization", "X-Requested-With"])
 
 # Add CORS headers to all responses
 @app.after_request
 def after_request(response):
-    response.headers.add('Access-Control-Allow-Origin', '*')
-    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+    # Get the origin from the request
+    origin = request.headers.get('Origin')
+    
+    # Check if the origin is in our allowed list
+    allowed_origins = [
+        "https://song-application.vercel.app",
+        "https://song-application-p2ab.onrender.com", 
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "http://localhost:5000",
+        "http://127.0.0.1:5000",
+        "http://localhost",
+        "http://127.0.0.1"
+    ]
+    
+    if origin in allowed_origins:
+        response.headers.add('Access-Control-Allow-Origin', origin)
+    else:
+        response.headers.add('Access-Control-Allow-Origin', 'https://song-application.vercel.app')
+    
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization,X-Requested-With')
     response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
     response.headers.add('Access-Control-Allow-Credentials', 'true')
+    
+    # Handle preflight requests
+    if request.method == 'OPTIONS':
+        response.status_code = 200
+    
+    return response
+
+# General OPTIONS handler for all routes
+@app.route("/<path:path>", methods=["OPTIONS"])
+def options_handler(path):
+    response = jsonify({"message": "OK"})
+    origin = request.headers.get('Origin')
+    
+    allowed_origins = [
+        "https://song-application.vercel.app",
+        "https://song-application-p2ab.onrender.com", 
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "http://localhost:5000",
+        "http://127.0.0.1:5000",
+        "http://localhost",
+        "http://127.0.0.1"
+    ]
+    
+    if origin in allowed_origins:
+        response.headers.add('Access-Control-Allow-Origin', origin)
+    else:
+        response.headers.add('Access-Control-Allow-Origin', 'https://song-application.vercel.app')
+    
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization,X-Requested-With')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+    response.headers.add('Access-Control-Allow-Credentials', 'true')
+    
     return response
 
 load_dotenv()
@@ -103,7 +161,17 @@ def test_artists():
             "timestamp": str(datetime.datetime.now())
         }), 500
 
-@app.route("/login", methods=['Get'])
+@app.route("/login", methods=['GET'])
+
+# Handle OPTIONS requests for login
+@app.route("/login/user", methods=["OPTIONS"])
+def login_user_options():
+    response = jsonify({"message": "OK"})
+    response.headers.add('Access-Control-Allow-Origin', 'https://song-application.vercel.app')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization,X-Requested-With')
+    response.headers.add('Access-Control-Allow-Methods', 'POST,OPTIONS')
+    response.headers.add('Access-Control-Allow-Credentials', 'true')
+    return response
 
 # handles a post request when the user clicks the log in button
 @app.route("/login/user", methods=["POST"])
