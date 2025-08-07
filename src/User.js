@@ -1,9 +1,8 @@
-import { useUser } from "./userContext";
-import { useEffect, useState } from "react";
-import axios from "axios";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-
-const BASE_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:5000";
+import { useUser } from "./userContext";
+import axios from "axios";
+import { API_BASE_URL } from './config';
 
 function User() {
   const { user } = useUser(); // Get user from context
@@ -23,7 +22,7 @@ function User() {
       return <h1>No user data found!</h1>;
     }else{
       try {
-        const response = await axios.post(`${BASE_URL}/user`, {  
+        const response = await axios.post(`${API_BASE_URL}/user`, {  
         });
         if (response.data){
             setName(response.data.name)

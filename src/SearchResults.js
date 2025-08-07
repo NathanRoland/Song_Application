@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import './SearchResults.css';
-
-const BASE_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:5000";
+import React, { useState, useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useUser } from "./userContext";
+import axios from "axios";
+import { API_BASE_URL } from './config';
+import "./SearchResults.css";
 
 const SearchResults = () => {
   const [searchResults, setSearchResults] = useState(null);
@@ -27,7 +27,7 @@ const SearchResults = () => {
       setLoading(true);
       setError(null);
       
-      const response = await axios.post(`${BASE_URL}/search`, {
+      const response = await axios.post(`${API_BASE_URL}/search`, {
         search: query
       });
 

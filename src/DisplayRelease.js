@@ -1,25 +1,22 @@
-import React, { useEffect, useState } from "react";
-import { useParams, useLocation } from "react-router-dom";
-import axios from "axios";
+import React, { useState, useEffect } from "react";
+import { useParams, Link } from "react-router-dom";
 import { useUser } from "./userContext";
-
-const BASE_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:5000";
+import axios from "axios";
+import { API_BASE_URL } from './config';
 
 function DisplayRelease() {
   const { id } = useParams();
-  const location = useLocation();
-  const [release, setRelease] = useState(location.state?.release || null);
-  const [loading, setLoading] = useState(!location.state?.release);
+  const [release, setRelease] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [artistNames, setArtistNames] = useState([]);
 
   useEffect(() => {
-    if (release) return; // Already have release data from state
     async function fetchRelease() {
       setLoading(true);
       setError(null);
       try {
-        const response = await axios.post(`${BASE_URL}/release/info`, { release_id: id });
+        const response = await axios.post(`${API_BASE_URL}/release/info`, { release_id: id });
         setRelease(response.data.release);
       } catch (err) {
         setError("Failed to fetch release info.");
@@ -28,7 +25,7 @@ function DisplayRelease() {
       }
     }
     fetchRelease();
-  }, [id, release]);
+  }, [id]);
 
   
 

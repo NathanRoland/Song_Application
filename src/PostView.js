@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { useUser } from './userContext';
-import axios from 'axios';
-import './PostView.css';
-
-const BASE_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:5000";
+import React, { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { useUser } from "./userContext";
+import axios from "axios";
+import { API_BASE_URL } from './config';
+import "./PostView.css";
 
 // Comment component for recursive rendering
 const Comment = ({ comment, onReply, replyingTo, replyText, setReplyText, onSubmitReply, onCancelReply, submittingReply, formatTime }) => {
@@ -114,7 +113,7 @@ const PostView = () => {
   const fetchPost = async () => {
     try {
       setLoading(true);
-      const response = await axios.post(`${BASE_URL}/post/view`, {
+      const response = await axios.post(`${API_BASE_URL}/post/view`, {
         post_id: postId
       });
       setPost(response.data.post_info);
@@ -134,7 +133,7 @@ const PostView = () => {
 
     try {
       const userId = typeof user === 'string' ? user : user.id || user;
-      await axios.post(`${BASE_URL}/post/like`, {
+      await axios.post(`${API_BASE_URL}/post/like`, {
         user_id: userId,
         post_id: postId
       });
@@ -159,7 +158,7 @@ const PostView = () => {
     try {
       setSubmittingComment(true);
       const userId = typeof user === 'string' ? user : user.id || user;
-      await axios.post(`${BASE_URL}/post/view/add_comment`, {
+      await axios.post(`${API_BASE_URL}/post/view/add_comment`, {
         user_id: userId,
         post_id: postId,
         comment_text: newComment.trim(),
@@ -191,7 +190,7 @@ const PostView = () => {
     try {
       setSubmittingReply(true);
       const userId = typeof user === 'string' ? user : user.id || user;
-      await axios.post(`${BASE_URL}/post/view/add_comment`, {
+      await axios.post(`${API_BASE_URL}/post/view/add_comment`, {
         user_id: userId,
         post_id: postId,
         comment_text: replyText.trim(),
@@ -297,7 +296,7 @@ const PostView = () => {
             {post.photo_path && (
               <div className="post-photo">
                 <img 
-                  src={`${BASE_URL}/${post.photo_path}`} 
+                  src={`${API_BASE_URL}/${post.photo_path}`} 
                   alt="Post photo" 
                   className="post-image"
                 />

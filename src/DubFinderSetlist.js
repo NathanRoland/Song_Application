@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
-import axios from 'axios';
-import './DubFinderSetlist.css';
-
-const BASE_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:5000";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { Link } from "react-router-dom";
+import { API_BASE_URL } from './config';
+import "./DubFinderSetlist.css";
 
 const DubFinderSetlist = () => {
   const [link, setLink] = useState('');
@@ -36,7 +36,7 @@ const DubFinderSetlist = () => {
     setSetlistResult(null);
 
     try {
-      const response = await axios.post(`${BASE_URL}/dubfinder/setlist`, {
+      const response = await axios.post(`${API_BASE_URL}/dubfinder/setlist`, {
         link: link.trim()
       });
 

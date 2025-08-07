@@ -1,44 +1,46 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 import { useUser } from "./userContext";
-
-const BASE_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:5000";
+import { API_BASE_URL } from './config';
 
 function ListItems({ header, list }){
     const sendDataToFlask2 = async(key, name, header) =>{
         try {
-            const response = await axios.post(`${BASE_URL}/search/result`, {
+            const response = await axios.post(`${API_BASE_URL}/search/result`, {
                 result: name,
                 type: header,
-                id: key
+                key: key
             });
-            if(response.data){
-                window.location.href = response.data;
-            }
-        } catch (error) {
-            console.error("Error sending data:", error);
+            console.log(response.data);
+        } catch (err) {
+            console.error("Error:", err);
         }
-    }
-    if(list.length >=1){
-    return(
+    };
+
+    return (
         <div>
-        <h1>{header}</h1>
-        <ul>
-            {list.map(item => (
-            <li key={item.key} onClick={() => sendDataToFlask2(item.key, item.name, header)}>{item.name}</li>))}
-        </ul>
+            <h3>{header}</h3>
+            <ul>
+                {list.map((item, index) => (
+                    <li key={index} onClick={() => sendDataToFlask2(index, item, header)}>
+                        {item}
+                    </li>
+                ))}
+            </ul>
         </div>
-    );}
+    );
 }
 
 function Search() {
-  const [search, setSearch] = useState("");
-  const { user } = useUser();  // Get user data from Context
-  const [songs, setSongs] = useState([]);
-  const [users, setUsers] = useState([]);
-  const [artists, setArtists] = useState([]);
-  const [releases, setReleases] = useState([]);
-  const [playlists, setPlaylists] = useState([]);
+    const [search, setSearch] = useState("");
+    const { user } = useUser();  // Get user data from Context
+    const navigate = useNavigate();
+    const [songs, setSongs] = useState([]);
+    const [users, setUsers] = useState([]);
+    const [artists, setArtists] = useState([]);
+    const [releases, setReleases] = useState([]);
+    const [playlists, setPlaylists] = useState([]);
 
     if (!user) {
       console.log("no data found")
@@ -50,7 +52,7 @@ function Search() {
 
   const fetchData = async () => {
     try {
-      const response = await axios.post(`${BASE_URL}/search`, {
+      const response = await axios.post(`${API_BASE_URL}/search`, {
         search: search,
       });
 

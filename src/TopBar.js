@@ -3,8 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useUser } from "./userContext";
 import SearchBar from "./SearchBar";
 import axios from "axios";
-
-const BASE_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:5000";
+import { API_BASE_URL } from './config';
 
 function TopBar() {
   const { user, setUser } = useUser();
@@ -39,7 +38,7 @@ function TopBar() {
       const userName = typeof user === 'string' ? user : user.name || user;
       const userId = typeof user === 'object' && user.id ? user.id : user;
       
-      const response = await axios.post(`${BASE_URL}/account`, {
+      const response = await axios.post(`${API_BASE_URL}/account`, {
         name: userName,
         id: userId
       });

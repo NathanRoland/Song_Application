@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { useUser } from './userContext';
-import axios from 'axios';
-import './ViewOtherAccount.css';
-
-const BASE_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:5000";
+import React, { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { useUser } from "./userContext";
+import axios from "axios";
+import { API_BASE_URL } from './config';
+import "./ViewOtherAccount.css";
 
 const ViewOtherAccount = () => {
   const { user } = useUser();
@@ -30,7 +29,7 @@ const ViewOtherAccount = () => {
   const fetchUserInfo = async () => {
     try {
       setLoading(true);
-      const response = await axios.post(`${BASE_URL}/account/view`, {
+      const response = await axios.post(`${API_BASE_URL}/account/view`, {
         user_id: userId
       });
       setUserInfo(response.data);
@@ -46,7 +45,7 @@ const ViewOtherAccount = () => {
     
     try {
       const currentUserId = typeof user === 'string' ? user : user.id || user;
-      const response = await axios.post(`${BASE_URL}/account/check_friend_status`, {
+      const response = await axios.post(`${API_BASE_URL}/account/check_friend_status`, {
         user_id: currentUserId,
         other_user_id: userId
       });
@@ -65,7 +64,7 @@ const ViewOtherAccount = () => {
 
     try {
       const currentUserId = typeof user === 'string' ? user : user.id || user;
-      await axios.post(`${BASE_URL}/account/view/add_friend`, {
+      await axios.post(`${API_BASE_URL}/account/view/add_friend`, {
         user_id: currentUserId,
         friend_id: userId
       });
@@ -82,7 +81,7 @@ const ViewOtherAccount = () => {
 
     try {
       const currentUserId = typeof user === 'string' ? user : user.id || user;
-      await axios.post(`${BASE_URL}/account/view/accept_friend`, {
+      await axios.post(`${API_BASE_URL}/account/view/accept_friend`, {
         user_id: currentUserId,
         friend_id: userId
       });
@@ -99,7 +98,7 @@ const ViewOtherAccount = () => {
 
     try {
       const currentUserId = typeof user === 'string' ? user : user.id || user;
-      await axios.post(`${BASE_URL}/account/view/reject_friend`, {
+      await axios.post(`${API_BASE_URL}/account/view/reject_friend`, {
         user_id: currentUserId,
         friend_id: userId
       });
@@ -116,7 +115,7 @@ const ViewOtherAccount = () => {
 
     try {
       const currentUserId = typeof user === 'string' ? user : user.id || user;
-      await axios.post(`${BASE_URL}/account/remove_sent_request`, {
+      await axios.post(`${API_BASE_URL}/account/remove_sent_request`, {
         user_id: currentUserId,
         friend_id: userId
       });

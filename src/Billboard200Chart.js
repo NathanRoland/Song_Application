@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
-
-const BASE_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:5000";
+import { API_BASE_URL } from './config';
 
 function Billboard200Chart() {
   const [chart, setChart] = useState(null);
@@ -10,7 +9,7 @@ function Billboard200Chart() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    axios.get(`${BASE_URL}/charts/billboard/200`)
+    axios.get(`${API_BASE_URL}/charts/billboard/200`)
       .then(res => {
         setChart(res.data.chart);
         setLoading(false);

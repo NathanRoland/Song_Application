@@ -1,8 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
-
-const BASE_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:5000";
+import { API_BASE_URL } from './config';
 
 function Songs() {
   const [search, setSearch] = useState("");
@@ -27,7 +26,7 @@ function Songs() {
     setShowAllReleases(false);
 
     try {
-      const response = await axios.post(`${BASE_URL}/songs`, {
+      const response = await axios.post(`${API_BASE_URL}/songs`, {
         song: search
       });
       
@@ -66,7 +65,7 @@ function Songs() {
   // Handler for clicking a song
   const handleSongClick = async (songId) => {
     try {
-      const response = await axios.post(`${BASE_URL}/song/info`, { song_id: songId });
+      const response = await axios.post(`${API_BASE_URL}/song/info`, { song_id: songId });
       navigate(`/song/info/${songId}`, { state: { song: response.data.song } });
     } catch (err) {
       alert("Failed to fetch song info.");
@@ -76,7 +75,7 @@ function Songs() {
   // Handler for clicking a release
   const handleReleaseClick = async (releaseId) => {
     try {
-      const response = await axios.post(`${BASE_URL}/release/info`, { release_id: releaseId });
+      const response = await axios.post(`${API_BASE_URL}/release/info`, { release_id: releaseId });
       navigate(`/release/info/${releaseId}`, { state: { release: response.data.release } });
     } catch (err) {
       alert("Failed to fetch release info.");

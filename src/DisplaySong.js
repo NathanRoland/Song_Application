@@ -1,25 +1,22 @@
-import React, { useEffect, useState } from "react";
-import { useParams, useLocation, Link } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useParams, Link } from "react-router-dom";
 import axios from "axios";
-
-const BASE_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:5000";
+import { API_BASE_URL } from './config';
 
 function DisplaySong() {
   const { id } = useParams();
-  const location = useLocation();
-  const [song, setSong] = useState(location.state?.song || null);
-  const [loading, setLoading] = useState(!location.state?.song);
+  const [song, setSong] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [artistNames, setArtistNames] = useState([]);
   const [releaseName, setReleaseName] = useState("");
 
   useEffect(() => {
-    if (song) return; // Already have song data from state
     async function fetchSong() {
       setLoading(true);
       setError(null);
       try {
-        const response = await axios.post(`${BASE_URL}/song/info`, { song_id: id });
+        const response = await axios.post(`${API_BASE_URL}/song/info`, { song_id: id });
         setSong(response.data.song);
       } catch (err) {
         setError("Failed to fetch song info.");
@@ -28,7 +25,7 @@ function DisplaySong() {
       }
     }
     fetchSong();
-  }, [id, song]);
+  }, [id]);
 
   
 

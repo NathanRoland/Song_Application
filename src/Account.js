@@ -1,9 +1,8 @@
-import { useUser } from "./userContext";
-import { useEffect, useState } from "react";
-import axios from "axios";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-
-const BASE_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:5000";
+import { useUser } from "./userContext";
+import axios from "axios";
+import { API_BASE_URL } from './config';
 
 function Account() {
   const { user, setUser } = useUser();
@@ -27,7 +26,7 @@ function Account() {
   const fetchData = async () => {
     if (!user) return;
     try {
-      const response = await axios.post(`${BASE_URL}/account`, {
+      const response = await axios.post(`${API_BASE_URL}/account`, {
         name: user.name,
         id: user.id,
       });
@@ -80,7 +79,7 @@ function Account() {
 
   const handleSave = async () => {
     try {
-      await axios.post(`${BASE_URL}/account/edit`, {
+      await axios.post(`${API_BASE_URL}/account/edit`, {
         name: user.name,
         ...form,
       });

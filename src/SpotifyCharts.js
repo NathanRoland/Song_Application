@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import './SpotifyCharts.css';
-
-const BASE_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:5000";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { Link } from "react-router-dom";
+import { API_BASE_URL } from './config';
+import "./SpotifyCharts.css";
 
 const SpotifyCharts = () => {
   const [selectedCountry, setSelectedCountry] = useState('Global');
@@ -52,7 +52,7 @@ const SpotifyCharts = () => {
     
     try {
       const endpoint = chartType === 'daily' ? '/charts/spotify/daily' : '/charts/spotify/weekly';
-      const response = await axios.post(`${BASE_URL}${endpoint}`, {
+      const response = await axios.post(`${API_BASE_URL}${endpoint}`, {
         country: selectedCountry
       });
       
