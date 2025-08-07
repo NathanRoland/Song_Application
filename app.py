@@ -12,6 +12,7 @@ from post import *
 
 from flask import Flask, render_template, request, abort, url_for, send_from_directory, jsonify
 from flask_socketio import SocketIO
+from flask_cors import CORS
 import json
 import secrets
 import billboard
@@ -23,8 +24,54 @@ import datetime
 from dotenv import load_dotenv
 
 app = Flask(__name__)
-
-# CORS will be handled by specific OPTIONS handlers
+CORS(app, resources={
+    r"/*": {
+        "origins": [
+            "https://song-application.vercel.app",
+            "https://dub-finder-backend.onrender.com",
+            "http://localhost:3000",
+            "http://127.0.0.1:3000",
+            "http://localhost:5001",
+            "http://127.0.0.1:5001",
+            "http://localhost",
+            "http://127.0.0.1"
+        ],
+        "supports_credentials": True,
+        "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+    }
+})
+# Add CORS headers to all responses
+@app.after_request
+def after_request(response):
+    # Get the origin from the request
+    origin = request.headers.get('Origin')
+    
+    # Check if the origin is in our allowed list
+    allowed_origins = [
+        "https://song-application.vercel.app",
+        "https://dub-finder-backend.onrender.com", 
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "http://localhost:5001",
+        "http://127.0.0.1:5001",
+        "http://localhost",
+        "http://127.0.0.1"
+    ]
+    
+    if origin in allowed_origins:
+        response.headers['Access-Control-Allow-Origin'] = origin
+    else:
+        response.headers['Access-Control-Allow-Origin'] = 'https://song-application.vercel.app'
+    
+    response.headers['Access-Control-Allow-Headers'] = 'Content-Type,Authorization,X-Requested-With'
+    response.headers['Access-Control-Allow-Methods'] = 'GET,PUT,POST,DELETE,OPTIONS'
+    response.headers['Access-Control-Allow-Credentials'] = 'true'
+    
+    # Handle preflight requests
+    if request.method == 'OPTIONS':
+        response.status_code = 200
+    
+    return response
 
 
 
@@ -88,113 +135,7 @@ def test_artists():
 
 @app.route("/login", methods=['GET'])
 
-@app.route("/login/user", methods=["OPTIONS"])
-def login_user_options():
-    response = jsonify({"message": "OK"})
-    origin = request.headers.get('Origin')
-    
-    allowed_origins = [
-        "https://song-application.vercel.app",
-        "https://dub-finder-backend.onrender.com", 
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
-        "http://localhost:5001",
-        "http://127.0.0.1:5001",
-        "http://localhost",
-        "http://127.0.0.1"
-    ]
-    
-    if origin in allowed_origins:
-        response.headers['Access-Control-Allow-Origin'] = origin
-    else:
-        response.headers['Access-Control-Allow-Origin'] = 'https://song-application.vercel.app'
-    
-    response.headers['Access-Control-Allow-Headers'] = 'Content-Type,Authorization,X-Requested-With'
-    response.headers['Access-Control-Allow-Methods'] = 'POST,OPTIONS'
-    response.headers['Access-Control-Allow-Credentials'] = 'true'
-    
-    return response
 
-@app.route("/signup/user", methods=["OPTIONS"])
-def signup_user_options():
-    response = jsonify({"message": "OK"})
-    origin = request.headers.get('Origin')
-    
-    allowed_origins = [
-        "https://song-application.vercel.app",
-        "https://dub-finder-backend.onrender.com", 
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
-        "http://localhost:5001",
-        "http://127.0.0.1:5001",
-        "http://localhost",
-        "http://127.0.0.1"
-    ]
-    
-    if origin in allowed_origins:
-        response.headers['Access-Control-Allow-Origin'] = origin
-    else:
-        response.headers['Access-Control-Allow-Origin'] = 'https://song-application.vercel.app'
-    
-    response.headers['Access-Control-Allow-Headers'] = 'Content-Type,Authorization,X-Requested-With'
-    response.headers['Access-Control-Allow-Methods'] = 'POST,OPTIONS'
-    response.headers['Access-Control-Allow-Credentials'] = 'true'
-    
-    return response
-
-@app.route("/account", methods=["OPTIONS"])
-def account_options():
-    response = jsonify({"message": "OK"})
-    origin = request.headers.get('Origin')
-    
-    allowed_origins = [
-        "https://song-application.vercel.app",
-        "https://dub-finder-backend.onrender.com", 
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
-        "http://localhost:5001",
-        "http://127.0.0.1:5001",
-        "http://localhost",
-        "http://127.0.0.1"
-    ]
-    
-    if origin in allowed_origins:
-        response.headers['Access-Control-Allow-Origin'] = origin
-    else:
-        response.headers['Access-Control-Allow-Origin'] = 'https://song-application.vercel.app'
-    
-    response.headers['Access-Control-Allow-Headers'] = 'Content-Type,Authorization,X-Requested-With'
-    response.headers['Access-Control-Allow-Methods'] = 'POST,OPTIONS'
-    response.headers['Access-Control-Allow-Credentials'] = 'true'
-    
-    return response
-
-@app.route("/feed", methods=["OPTIONS"])
-def feed_options():
-    response = jsonify({"message": "OK"})
-    origin = request.headers.get('Origin')
-    
-    allowed_origins = [
-        "https://song-application.vercel.app",
-        "https://dub-finder-backend.onrender.com", 
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
-        "http://localhost:5001",
-        "http://127.0.0.1:5001",
-        "http://localhost",
-        "http://127.0.0.1"
-    ]
-    
-    if origin in allowed_origins:
-        response.headers['Access-Control-Allow-Origin'] = origin
-    else:
-        response.headers['Access-Control-Allow-Origin'] = 'https://song-application.vercel.app'
-    
-    response.headers['Access-Control-Allow-Headers'] = 'Content-Type,Authorization,X-Requested-With'
-    response.headers['Access-Control-Allow-Methods'] = 'POST,OPTIONS'
-    response.headers['Access-Control-Allow-Credentials'] = 'true'
-    
-    return response
 
 # handles a post request when the user clicks the log in button
 @app.route("/login/user", methods=["POST"])
@@ -234,29 +175,7 @@ def login_user():
                         
     except Exception as e:
         print(f"❌ Error in login_user: {str(e)}")
-        response = jsonify({"error": f"Server error: {str(e)}"}), 500
-    
-    # Add CORS headers to the response
-    origin = request.headers.get('Origin')
-    allowed_origins = [
-        "https://song-application.vercel.app",
-        "https://dub-finder-backend.onrender.com", 
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
-        "http://localhost:5001",
-        "http://127.0.0.1:5001",
-        "http://localhost",
-        "http://127.0.0.1"
-    ]
-    
-    if origin in allowed_origins:
-        response[0].headers['Access-Control-Allow-Origin'] = origin
-    else:
-        response[0].headers['Access-Control-Allow-Origin'] = 'https://song-application.vercel.app'
-    
-    response[0].headers['Access-Control-Allow-Headers'] = 'Content-Type,Authorization,X-Requested-With'
-    response[0].headers['Access-Control-Allow-Methods'] = 'POST,OPTIONS'
-    response[0].headers['Access-Control-Allow-Credentials'] = 'true'
+        return jsonify({"error": f"Server error: {str(e)}"}), 500
     
     return response
 
@@ -905,6 +824,7 @@ def get_songs():
     if len(song_info) == 0:
         get_song_from_name_musicbrainz(song_name)
         song_info = searchForLikeSongs(song_name)
+    print("------------------------SONG INFO--------")
     print(song_info)
     all_songs = []
     for song in song_info:

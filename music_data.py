@@ -175,38 +175,45 @@ def get_song_from_name_musicbrainz(song_name):
     #print(response)
     data = response.json()
     #print(data)
+    print("testing")
     for rec in data["recordings"]:
-        #print(rec)
-        name = rec["title"]
-        release_id = rec["releases"][0]["id"]
-        if "primary-type" in rec["releases"][0]["release-group"]:
-            type = rec["releases"][0]["release-group"]["primary-type"]
-        else:
-            type = None
-        artists = []
-        for artist in rec["artist-credit"]:
-            artist_deets = get_artist_from_musicbrainz_id(artist["artist"]["id"])
-            print(artist_deets)
-            if len(get_artist_name(artist["artist"]["id"])) == 0:
-                if "area" not in artist_deets:
-                    create_artist(artist["artist"]["id"], artist_deets["name"], None, None, None, None, None, None, None, None, None, None)
-                else:
-                    if artist_deets.get("area") is not None:
-                        create_artist(artist["artist"]["id"], artist_deets["name"], None, None, None, None, None, None, None, None, artist_deets["area"]["name"], None)
-                    else:
+        try:
+            #print(rec)
+            name = rec["title"]
+            print("--------------------------------")
+            print(rec)
+            release_id = rec["releases"][0]["id"]
+            if "primary-type" in rec["releases"][0]["release-group"]:
+                type = rec["releases"][0]["release-group"]["primary-type"]
+            else:
+                type = None
+            artists = []
+            for artist in rec["artist-credit"]:
+                artist_deets = get_artist_from_musicbrainz_id(artist["artist"]["id"])
+                print(artist_deets)
+                if len(get_artist_name(artist["artist"]["id"])) == 0:
+                    if "area" not in artist_deets:
                         create_artist(artist["artist"]["id"], artist_deets["name"], None, None, None, None, None, None, None, None, None, None)
-        artists = " & ".join(a["name"] for a in rec["artist-credit"])
-        duration_ms = rec.get("length")
-        duration = f"{duration_ms // 60000}:{(duration_ms // 1000) % 60:02}" if duration_ms else "??:??"
-        #releases = get_releases_from_group(release_id)
-        
-        if type == "Album":
-            get_release_details_musicbrainz(release_id, True, False, False)
-        elif type == "EP":
-            get_release_details_musicbrainz(release_id, False, True, False)
-        elif type == "Single":
-            get_release_details_musicbrainz(release_id, False, False, True)
-        print(f"{name} — {artists} ({duration}) {release_id} {type}")    
+                    else:
+                        if artist_deets.get("area") is not None:
+                            create_artist(artist["artist"]["id"], artist_deets["name"], None, None, None, None, None, None, None, None, artist_deets["area"]["name"], None)
+                        else:
+                            create_artist(artist["artist"]["id"], artist_deets["name"], None, None, None, None, None, None, None, None, None, None)
+            artists = " & ".join(a["name"] for a in rec["artist-credit"])
+            duration_ms = rec.get("length")
+            duration = f"{duration_ms // 60000}:{(duration_ms // 1000) % 60:02}" if duration_ms else "??:??"
+            #releases = get_releases_from_group(release_id)
+            
+            if type == "Album":
+                get_release_details_musicbrainz(release_id, True, False, False)
+            elif type == "EP":
+                get_release_details_musicbrainz(release_id, False, True, False)
+            elif type == "Single":
+                get_release_details_musicbrainz(release_id, False, False, True)
+            print(f"{name} — {artists} ({duration}) {release_id} {type}") 
+        except Exception as e:
+            print(f"Error processing song: {e}")
+            continue    
     #print(data)
 
 def set_all_release_pics():
