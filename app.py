@@ -23,7 +23,14 @@ import os
 import tempfile
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, origins=[
+    "https://song-application.vercel.app",
+    "https://song-application-p2ab.onrender.com", 
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "http://localhost:5000",
+    "http://127.0.0.1:5000"
+], supports_credentials=True)
 load_dotenv()
 
 # secret key used to sign the session cookie
@@ -1032,5 +1039,7 @@ def search_results():
     print("---")
     return jsonify({"songs": songs, "artists": artists, "users": users, "releases": releases, "playlists": playlists, "posts": posts})
 
-if __name__ == '__main__':
-    app.run(debug=True)
+if __name__ == "__main__":
+    # For production deployment
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port, debug=False)

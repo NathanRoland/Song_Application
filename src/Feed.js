@@ -2,9 +2,8 @@ import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'rea
 import { useUser } from './userContext';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { API_BASE_URL } from './config';
 import './Feed.css';
-
-const BASE_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:5000";
 
 const Feed = forwardRef((props, ref) => {
   const { user } = useUser();
@@ -16,7 +15,7 @@ const Feed = forwardRef((props, ref) => {
   const fetchFeed = async () => {
     try {
       setLoading(true);
-      const response = await axios.post(`${BASE_URL}/feed`, {
+      const response = await axios.post(`${API_BASE_URL}/feed`, {
         user_id: user.id
       });
       setPosts(response.data.posts || []);
@@ -46,7 +45,7 @@ const Feed = forwardRef((props, ref) => {
 
   const handleLikePost = async (postId) => {
     try {
-      await axios.post(`${BASE_URL}/post/like`, {
+      await axios.post(`${API_BASE_URL}/post/like`, {
         user_id: user.id,
         post_id: postId
       });
@@ -130,7 +129,7 @@ const Feed = forwardRef((props, ref) => {
                 {post.photo_path && (
                   <div className="post-photo">
                     <img 
-                      src={`${BASE_URL}/${post.photo_path}`} 
+                      src={`${API_BASE_URL}/${post.photo_path}`} 
                       alt="Post photo" 
                       className="post-image"
                     />

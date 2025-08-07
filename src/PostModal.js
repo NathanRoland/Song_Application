@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useUser } from './userContext';
 import axios from 'axios';
+import { API_BASE_URL } from './config';
 import './PostModal.css';
-
-const BASE_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:5000";
 
 const PostModal = ({ isOpen, onClose, postId = null, onPostCreated }) => {
   const { user } = useUser();
@@ -26,7 +25,7 @@ const PostModal = ({ isOpen, onClose, postId = null, onPostCreated }) => {
   const fetchPost = async () => {
     try {
       setLoading(true);
-      const response = await axios.post(`${BASE_URL}/post/view`, {
+      const response = await axios.post(`${API_BASE_URL}/post/view`, {
         post_id: postId
       });
       setPostData(response.data.post_info);
@@ -66,7 +65,7 @@ const PostModal = ({ isOpen, onClose, postId = null, onPostCreated }) => {
         formData.append('photo', selectedPhoto);
       }
 
-      const response = await axios.post(`${BASE_URL}/post/publish`, formData, {
+      const response = await axios.post(`${API_BASE_URL}/post/publish`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -104,7 +103,7 @@ const PostModal = ({ isOpen, onClose, postId = null, onPostCreated }) => {
       setError(null);
       
       // You'll need to implement this endpoint
-      await axios.post(`${BASE_URL}/post/comment`, {
+      await axios.post(`${API_BASE_URL}/post/comment`, {
         user_id: user.id,
         post_id: postId,
         comment_text: commentText
@@ -241,7 +240,7 @@ const PostModal = ({ isOpen, onClose, postId = null, onPostCreated }) => {
                   {postData.photo_path && (
                     <div className="post-photo">
                       <img 
-                        src={`${BASE_URL}/${postData.photo_path}`} 
+                        src={`${API_BASE_URL}/${postData.photo_path}`} 
                         alt="Post photo" 
                         className="post-image"
                       />
