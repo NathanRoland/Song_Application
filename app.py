@@ -21,6 +21,8 @@ import billboard
 import bcrypt
 import os
 import tempfile
+import datetime
+from dotenv import load_dotenv
 
 app = Flask(__name__)
 CORS(app, origins=[
@@ -55,7 +57,23 @@ REMEMBER_COOKIE_HTTPONLY = True
 
 @app.route("/")
 def health_check():
-    return jsonify({"status": "healthy", "message": "Server is running"})
+    try:
+        # Test database connection
+        from database_manager import test_connection
+        db_status = test_connection()
+        
+        return jsonify({
+            "status": "healthy", 
+            "message": "Server is running",
+            "database": "connected" if db_status else "disconnected",
+            "timestamp": str(datetime.datetime.now())
+        })
+    except Exception as e:
+        return jsonify({
+            "status": "unhealthy",
+            "message": f"Server error: {str(e)}",
+            "timestamp": str(datetime.datetime.now())
+        }), 500
 
 @app.route("/login", methods=['Get'])
 
@@ -1080,4 +1098,14 @@ if __name__ == "__main__":
     # For production deployment
     port = int(os.environ.get("PORT", 5001))
     debug = os.environ.get("FLASK_ENV") == "development"
-    app.run(host="0.0.0.0", port=port, debug=debug)
+    
+    print(f"🚀 Starting Flask app on port {port}")
+    print(f"🔧 Debug mode: {debug}")
+    print(f"🌐 Host: 0.0.0.0")
+    print(f"📊 Environment: {os.environ.get('FLASK_ENV', 'production')}")
+    
+    try:
+        app.run(host="0.0.0.0", port=port, debug=debug)
+    except Exception as e:
+        print(f"❌ Error starting Flask app: {e}")
+        raise e
