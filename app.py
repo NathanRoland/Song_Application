@@ -29,8 +29,20 @@ CORS(app, origins=[
     "http://localhost:3000",
     "http://127.0.0.1:3000",
     "http://localhost:5000",
-    "http://127.0.0.1:5000"
-], supports_credentials=True)
+    "http://127.0.0.1:5000",
+    "http://localhost",
+    "http://127.0.0.1"
+], supports_credentials=True, methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"])
+
+# Add CORS headers to all responses
+@app.after_request
+def after_request(response):
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+    response.headers.add('Access-Control-Allow-Credentials', 'true')
+    return response
+
 load_dotenv()
 
 # secret key used to sign the session cookie
@@ -40,6 +52,10 @@ SESSION_COOKIE_SECURE = True
 REMEMBER_COOKIE_SECURE = True
 SESSION_COOKIE_HTTPONLY = True
 REMEMBER_COOKIE_HTTPONLY = True
+
+@app.route("/")
+def health_check():
+    return jsonify({"status": "healthy", "message": "Server is running"})
 
 @app.route("/login", methods=['Get'])
 
@@ -839,71 +855,92 @@ def charts():
 
 @app.route("/charts/billboard/hot-100")
 def top_charts():
-    chart = billboard.ChartData('hot-100')
-    entries = [
-        {
-            "rank": entry.rank,
-            "title": entry.title,
-            "artist": entry.artist,
-            "lastPos": entry.lastPos,
-            "peakPos": entry.peakPos,
-            "weeks": entry.weeks
-        }
-        for entry in chart
-    ]
-    return jsonify({
-        "chart": {
-            "title": chart.name,
-            "date": chart.date,
-            "entries": entries
-        }
-    })
+    try:
+        chart = billboard.ChartData('hot-100')
+        entries = [
+            {
+                "rank": entry.rank,
+                "title": entry.title,
+                "artist": entry.artist,
+                "lastPos": entry.lastPos,
+                "peakPos": entry.peakPos,
+                "weeks": entry.weeks
+            }
+            for entry in chart
+        ]
+        return jsonify({
+            "chart": {
+                "title": chart.name,
+                "date": chart.date,
+                "entries": entries
+            }
+        })
+    except Exception as e:
+        print(f"Error fetching Billboard Hot 100: {str(e)}")
+        return jsonify({
+            "error": "Failed to fetch chart data",
+            "message": str(e)
+        }), 500
 
 @app.route("/charts/billboard-200")
 def top_200():
-    chart = billboard.ChartData('billboard-200')
-    print(chart)
-    entries = [
-        {
-            "rank": entry.rank,
-            "title": entry.title,
-            "artist": entry.artist,
-            "lastPos": entry.lastPos,
-            "peakPos": entry.peakPos,
-            "weeks": entry.weeks
-        }
-        for entry in chart
-    ]
-    return jsonify({
-        "chart": {
-            "title": chart.name,
-            "date": chart.date,
-            "entries": entries
-        }
-    })
+    try:
+        chart = billboard.ChartData('billboard-200')
+        print(chart)
+        entries = [
+            {
+                "rank": entry.rank,
+                "title": entry.title,
+                "artist": entry.artist,
+                "lastPos": entry.lastPos,
+                "peakPos": entry.peakPos,
+                "weeks": entry.weeks
+            }
+            for entry in chart
+        ]
+        return jsonify({
+            "chart": {
+                "title": chart.name,
+                "date": chart.date,
+                "entries": entries
+            }
+        })
+    except Exception as e:
+        print(f"Error fetching Billboard 200: {str(e)}")
+        return jsonify({
+            "error": "Failed to fetch chart data",
+            "message": str(e)
+        }), 500
 
 @app.route("/charts/billboard/global-200")
 def top_global_200():
-    chart = billboard.ChartData('billboard-global-200')
-    print(chart)
-    entries = [
-        {
-            "rank": entry.rank,
-            "title": entry.title,
-            "artist": entry.artist, 
-            "lastPos": entry.lastPos,
-            "peakPos": entry.peakPos,
-            "weeks": entry.weeks
-        }
-        for entry in chart
-    ]
-    return jsonify({
-        "chart": {
-            "title": chart.name,
-            "date": chart.date,
-            "entries": entries
-        }
-    })
+    try:
+        chart = billboard.ChartData('billboard-global-200')
+        print(chart)
+        entries = [
+            {
+                "rank": entry.rank,
+                "title": entry.title,
+                "artist": entry.artist, 
+                "lastPos": entry.lastPos,
+                "peakPos": entry.peakPos,
+                "weeks": entry.weeks
+            }
+            for entry in chart
+        ]
+        return jsonify({
+            "chart": {
+                "title": chart.name,
+                "date": chart.date,
+                "entries": entries
+            }
+        })
+    except Exception as e:
+        print(f"Error fetching Billboard Global 200: {str(e)}")
+        return jsonify({
+            "error": "Failed to fetch chart data",
+            "message": str(e)
+        }), 500
 
 @app.route("/charts/spotify/daily", methods=["POST"])
 def spotify_daily():
@@ -1041,5 +1078,5 @@ def search_results():
 
 if __name__ == "__main__":
     # For production deployment
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port, debug=False)
+    port = int(os.environ.get("PORT", 5001))
+    app.run(host="0.0.0.0", port=port, debug=True)

@@ -51,8 +51,8 @@ const SpotifyCharts = () => {
     setError(null);
     
     try {
-      const endpoint = chartType === 'daily' ? '/charts/spotify/daily' : '/charts/spotify/weekly';
-      const response = await axios.post(`${API_BASE_URL}${endpoint}`, {
+      const endpoint = chartType === 'daily' ? 'charts/spotify/daily' : 'charts/spotify/weekly';
+      const response = await axios.post(`${API_BASE_URL}/${endpoint}`, {
         country: selectedCountry
       });
       

@@ -5,14 +5,13 @@ const getApiUrl = () => {
     return process.env.REACT_APP_API_URL;
   }
   
-  // If we're in production (not localhost), use the deployed backend
-  if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
-    // Replace this with your actual Render backend URL
-    return "https://song-application-p2ab.onrender.com";
+  // For development, always use localhost backend
+  if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+    return "http://127.0.0.1:5001";
   }
   
-  // Default to localhost for development
-  return "http://127.0.0.1:5000";
+  // For production, use the deployed backend
+  return "https://song-application-p2ab.onrender.com";
 };
 
 export const API_BASE_URL = getApiUrl(); 
