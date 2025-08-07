@@ -4,8 +4,6 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.exc import OperationalError, DisconnectionError
 from sqlalchemy.pool import QueuePool
-import psycopg2
-from psycopg2.extras import RealDictCursor
 
 def load_env_file():
     """Load environment variables from .env file"""
