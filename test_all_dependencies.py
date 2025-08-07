@@ -21,7 +21,8 @@ def test_core_dependencies():
         ("bcrypt", "bcrypt"),
         ("gunicorn", "gunicorn"),
         ("pydub", "pydub"),
-        ("BeautifulSoup", "bs4")
+        ("BeautifulSoup", "bs4"),
+        ("audioop-lts", "audioop")
     ]
     
     results = []
