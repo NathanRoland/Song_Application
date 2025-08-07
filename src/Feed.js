@@ -35,7 +35,7 @@ const Feed = forwardRef((props, ref) => {
     if (user) {
       fetchFeed();
     }
-  }, [user]);
+  }, [user, fetchFeed]);
 
   const handleViewPost = (postId) => {
     navigate(`/post/${postId}`);
@@ -130,7 +130,7 @@ const Feed = forwardRef((props, ref) => {
                   <div className="post-photo">
                     <img 
                       src={`${API_BASE_URL}/${post.photo_path}`} 
-                      alt="Post photo" 
+                      alt="" 
                       className="post-image"
                     />
                   </div>

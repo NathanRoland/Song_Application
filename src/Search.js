@@ -35,7 +35,6 @@ function ListItems({ header, list }){
 function Search() {
     const [search, setSearch] = useState("");
     const { user } = useUser();  // Get user data from Context
-    const navigate = useNavigate();
     const [songs, setSongs] = useState([]);
     const [users, setUsers] = useState([]);
     const [artists, setArtists] = useState([]);

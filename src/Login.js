@@ -7,7 +7,7 @@ import { API_BASE_URL } from './config';
 function Login() {
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
-  const { user, setUser } = useUser();
+  const { setUser } = useUser();
   const navigate = useNavigate();
 
   const sendDataToFlask = async () => {

@@ -10,6 +10,7 @@ const PostModal = ({ isOpen, onClose, postId = null, onPostCreated }) => {
   const [postText, setPostText] = useState('');
   const [selectedPhoto, setSelectedPhoto] = useState(null);
   const [photoPreview, setPhotoPreview] = useState(null);
+
   const [isCreating, setIsCreating] = useState(!postId);
   const [postData, setPostData] = useState(null);
   const [commentText, setCommentText] = useState('');
@@ -20,7 +21,7 @@ const PostModal = ({ isOpen, onClose, postId = null, onPostCreated }) => {
     if (isOpen && postId) {
       fetchPost();
     }
-  }, [isOpen, postId]);
+  }, [isOpen, postId, fetchPost]);
 
   const fetchPost = async () => {
     try {
@@ -241,7 +242,7 @@ const PostModal = ({ isOpen, onClose, postId = null, onPostCreated }) => {
                     <div className="post-photo">
                       <img 
                         src={`${API_BASE_URL}/${postData.photo_path}`} 
-                        alt="Post photo" 
+                        alt="" 
                         className="post-image"
                       />
                     </div>

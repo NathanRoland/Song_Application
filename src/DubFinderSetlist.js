@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import axios from "axios";
-import { Link } from "react-router-dom";
 import { API_BASE_URL } from './config';
 import "./DubFinderSetlist.css";
 
@@ -286,10 +285,10 @@ const DubFinderSetlist = () => {
                   const dataStr = JSON.stringify(setlistData, null, 2);
                   const dataBlob = new Blob([dataStr], {type: 'application/json'});
                   const url = URL.createObjectURL(dataBlob);
-                  const link = document.createElement('a');
-                  link.href = url;
-                  link.download = 'setlist-analysis.json';
-                  link.click();
+                  const downloadLink = document.createElement('a');
+                  downloadLink.href = url;
+                  downloadLink.download = 'setlist-analysis.json';
+                  downloadLink.click();
                 }}
               >
                 💾 Download JSON

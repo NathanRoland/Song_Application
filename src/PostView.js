@@ -108,7 +108,7 @@ const PostView = () => {
     if (postId) {
       fetchPost();
     }
-  }, [postId]);
+  }, [postId, fetchPost]);
 
   const fetchPost = async () => {
     try {
@@ -297,7 +297,7 @@ const PostView = () => {
               <div className="post-photo">
                 <img 
                   src={`${API_BASE_URL}/${post.photo_path}`} 
-                  alt="Post photo" 
+                  alt="" 
                   className="post-image"
                 />
               </div>
