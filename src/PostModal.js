@@ -17,12 +17,6 @@ const PostModal = ({ isOpen, onClose, postId = null, onPostCreated }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    if (isOpen && postId) {
-      fetchPost();
-    }
-  }, [isOpen, postId, fetchPost]);
-
   const fetchPost = useCallback(async () => {
     try {
       setLoading(true);
@@ -36,6 +30,12 @@ const PostModal = ({ isOpen, onClose, postId = null, onPostCreated }) => {
       setLoading(false);
     }
   }, [postId]);
+
+  useEffect(() => {
+    if (isOpen && postId) {
+      fetchPost();
+    }
+  }, [isOpen, postId, fetchPost]);
 
   const handlePhotoSelect = (e) => {
     const file = e.target.files[0];

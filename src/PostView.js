@@ -104,12 +104,6 @@ const PostView = () => {
   const [replyText, setReplyText] = useState('');
   const [submittingReply, setSubmittingReply] = useState(false);
 
-  useEffect(() => {
-    if (postId) {
-      fetchPost();
-    }
-  }, [postId, fetchPost]);
-
   const fetchPost = useCallback(async () => {
     try {
       setLoading(true);
@@ -124,6 +118,12 @@ const PostView = () => {
       setLoading(false);
     }
   }, [postId]);
+
+  useEffect(() => {
+    if (postId) {
+      fetchPost();
+    }
+  }, [postId, fetchPost]);
 
   const handleLikePost = async () => {
     if (!user) {

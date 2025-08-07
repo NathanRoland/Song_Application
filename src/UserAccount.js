@@ -441,13 +441,6 @@ const UserAccount = () => {
           <div className="friend-requests-section">
             <h3>👥 Friend Requests</h3>
             
-            {friendRequestsLoading ? (
-              <div className="loading-spinner"></div>
-            ) : friendRequestsError ? (
-              <div className="error-message">
-                <p>{friendRequestsError}</p>
-              </div>
-            ) : (
               <div className="friend-requests-content">
                 {/* Received Friend Requests */}
                 <div className="received-requests">
@@ -503,7 +496,6 @@ const UserAccount = () => {
                   )}
                 </div>
               </div>
-            )}
           </div>
         )}
 
