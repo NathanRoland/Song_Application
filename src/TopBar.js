@@ -4,6 +4,8 @@ import { useUser } from "./userContext";
 import SearchBar from "./SearchBar";
 import axios from "axios";
 
+const BASE_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:5000";
+
 function TopBar() {
   const { user, setUser } = useUser();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -37,7 +39,7 @@ function TopBar() {
       const userName = typeof user === 'string' ? user : user.name || user;
       const userId = typeof user === 'object' && user.id ? user.id : user;
       
-      const response = await axios.post('http://127.0.0.1:5000/account', {
+      const response = await axios.post(`${BASE_URL}/account`, {
         name: userName,
         id: userId
       });

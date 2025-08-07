@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 
+const BASE_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:5000";
+
 function DisplayArtist() {
   const { id } = useParams();
   const [artist, setArtist] = useState(null);
@@ -14,7 +16,7 @@ function DisplayArtist() {
       setLoading(true);
       setError(null);
       try {
-        const response = await axios.post("http://127.0.0.1:5000/artist/info", { artist_id: id });
+        const response = await axios.post(`${BASE_URL}/artist/info`, { artist_id: id });
         setArtist(response.data);
       } catch (err) {
         setError("Failed to fetch artist info.");

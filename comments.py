@@ -1,17 +1,15 @@
-from sqlalchemy import create_engine, select, delete, func, update
+from sqlalchemy import create_engine, select, delete, func, update, text
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import PendingRollbackError, IntegrityError
 from classes import *
+import os
+from database_manager import engine, execute_with_retry
 
 from pathlib import Path
+from datetime import datetime
 
 # creates the database directory
 Path("database").mkdir(exist_ok=True)
-
-# "database/main.db" specifies the database file
-# change it if you wish
-# turn echo = True to display the sql output
-engine = create_engine("sqlite:///database/main.db", echo=False)
 
 # initializes the database
 Base.metadata.create_all(engine)

@@ -2,10 +2,12 @@ import { useState } from "react";
 import axios from "axios";
 import { useUser } from "./userContext";
 
+const BASE_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:5000";
+
 function ListItems({ header, list }){
     const sendDataToFlask2 = async(key, name, header) =>{
         try {
-            const response = await axios.post("http://127.0.0.1:5000/search/result", {
+            const response = await axios.post(`${BASE_URL}/search/result`, {
                 result: name,
                 type: header,
                 id: key
@@ -48,7 +50,7 @@ function Search() {
 
   const fetchData = async () => {
     try {
-      const response = await axios.post("http://127.0.0.1:5000/search", {
+      const response = await axios.post(`${BASE_URL}/search`, {
         search: search,
       });
 

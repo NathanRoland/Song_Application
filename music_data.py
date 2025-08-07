@@ -1,4 +1,4 @@
-from api import *
+#from api import *
 import json
 import requests
 import tarfile
@@ -95,18 +95,6 @@ def get_release_details_musicbrainz(release_id, is_album, is_EP, is_Song):
     response = requests.get(url, headers=headers, params=params)
     response.raise_for_status()
     release = response.json()
-    #print("\n","-"*40,"\n",release)
-    #print(f"Title: {release['title']}")
-    #print(f"Date: {release.get('date', 'Unknown')}")
-    #print(f"Country: {release.get('country', 'Unknown')}")
-
-    #print("Label(s):", ", ".join(
-    #    label_info['label']['name']
-    #    for label_info in release.get('label-info', [])
-    #    if 'label' in label_info
-    #))
-    #create_release(release_id, name, artist_id, artist_id_2, artist_id_3, artist_id_4, release_date, time, unreleased, is_album, is_EP, is_Song, release_pic):
-
     if "date" in release:
         date = release["date"]
     else:
@@ -115,7 +103,8 @@ def get_release_details_musicbrainz(release_id, is_album, is_EP, is_Song):
         unreleased = release["status"]
     else:
         unreleased = None
-    release_pic = release["cover-art-archive"]["artwork"]
+    release_pic = get_release_pic_for_release(release_id)
+    print(release_pic)
     name = release["title"]
     artist_credits = release["artist-credit"]
     artists = [None, None, None, None]
@@ -226,27 +215,35 @@ def set_all_release_pics():
         print(row)
         release_id = row[0]
         release_pic = row[-1]
-        cover_art_url = f"https://coverartarchive.org/release/{release_id}/front"
-        response = requests.get(cover_art_url)
-        if response.status_code == 200:
-            print(cover_art_url)
-            set_release_pic(release_id, cover_art_url)
-        else:
-            print("no cover art found") 
-            set_release_pic(release_id, None)
+        if release_pic == str(1) or release_pic == str(0):
+            print("setting release pic", release_id)
+            cover_art_url = f"https://coverartarchive.org/release/{release_id}/front"
+            response = requests.get(cover_art_url)
+            if response.status_code == 200:
+                print(cover_art_url)
+                set_release_pic(release_id, cover_art_url)
+            else:
+                print("no cover art found") 
+                set_release_pic(release_id, None)
 
 def set_all_song_pics():
     all_rows = find_cover_art_for_song()
     for row in all_rows:
         print(row)
         song_id = row[0]
-        release_id = get_release_id(song_id)[0][0]
-        print(release_id)
-        cover_art_url = f"https://coverartarchive.org/release/{release_id}/front"
-        response = requests.get(cover_art_url)
-        if response.status_code == 200:
-            print(cover_art_url)
-            set_song_pic(song_id, cover_art_url)
-        else:
-            print("no cover art found") 
-            set_song_pic(song_id, None)
+        song_pic = row[-1]
+        if song_pic == str(1) or song_pic == str(0):
+            print("setting song pic", song_id)
+            release_id = get_release_id(song_id)[0][0]
+            release_pic = get_release_pic(release_id)[0][0]
+            print(release_pic)
+            set_song_pic(song_id, release_pic)
+            
+
+def get_release_pic_for_release(release_id):
+    cover_art_url = f"https://coverartarchive.org/release/{release_id}/front"
+    response = requests.get(cover_art_url)
+    if response.status_code == 200:
+        return cover_art_url
+    else:
+        return None

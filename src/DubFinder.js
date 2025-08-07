@@ -2,6 +2,8 @@ import React, { useState, useRef } from 'react';
 import axios from 'axios';
 import './DubFinder.css';
 
+const BASE_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:5000";
+
 const DubFinder = () => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -62,7 +64,7 @@ const DubFinder = () => {
     formData.append('file', selectedFile);
 
     try {
-      const response = await axios.post('http://127.0.0.1:5000/dubfinder/upload', formData, {
+      const response = await axios.post(`${BASE_URL}/dubfinder/upload`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },

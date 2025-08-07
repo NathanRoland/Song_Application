@@ -3,7 +3,9 @@ import { useUser } from './userContext';
 import axios from 'axios';
 import './PostModal.css';
 
-const PostModal = ({ isOpen, onClose, postId = null }) => {
+const BASE_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:5000";
+
+const PostModal = ({ isOpen, onClose, postId = null, onPostCreated }) => {
   const { user } = useUser();
   const [postTitle, setPostTitle] = useState('');
   const [postText, setPostText] = useState('');
@@ -24,7 +26,7 @@ const PostModal = ({ isOpen, onClose, postId = null }) => {
   const fetchPost = async () => {
     try {
       setLoading(true);
-      const response = await axios.post('http://127.0.0.1:5000/post/view', {
+      const response = await axios.post(`${BASE_URL}/post/view`, {
         post_id: postId
       });
       setPostData(response.data.post_info);
@@ -64,7 +66,7 @@ const PostModal = ({ isOpen, onClose, postId = null }) => {
         formData.append('photo', selectedPhoto);
       }
 
-      const response = await axios.post('http://127.0.0.1:5000/post/publish', formData, {
+      const response = await axios.post(`${BASE_URL}/post/publish`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -78,6 +80,11 @@ const PostModal = ({ isOpen, onClose, postId = null }) => {
         setPhotoPreview(null);
         onClose();
         // Optionally refresh the feed or show success message
+        if (onPostCreated) {
+          onPostCreated();
+        }
+        // Show success message (you could add a toast notification here)
+        console.log('Post published successfully!');
       }
     } catch (err) {
       setError('Failed to create post');
@@ -97,7 +104,7 @@ const PostModal = ({ isOpen, onClose, postId = null }) => {
       setError(null);
       
       // You'll need to implement this endpoint
-      await axios.post('http://127.0.0.1:5000/post/comment', {
+      await axios.post(`${BASE_URL}/post/comment`, {
         user_id: user.id,
         post_id: postId,
         comment_text: commentText
@@ -234,7 +241,7 @@ const PostModal = ({ isOpen, onClose, postId = null }) => {
                   {postData.photo_path && (
                     <div className="post-photo">
                       <img 
-                        src={`http://127.0.0.1:5000/${postData.photo_path}`} 
+                        src={`${BASE_URL}/${postData.photo_path}`} 
                         alt="Post photo" 
                         className="post-image"
                       />

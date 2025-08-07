@@ -1,27 +1,22 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { useUser } from './userContext';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import './Feed.css';
 
-const Feed = () => {
+const BASE_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:5000";
+
+const Feed = forwardRef((props, ref) => {
   const { user } = useUser();
   const navigate = useNavigate();
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-
-  useEffect(() => {
-    if (user) {
-      fetchFeed();
-    }
-  }, [user]);
-
   const fetchFeed = async () => {
     try {
       setLoading(true);
-      const response = await axios.post('http://127.0.0.1:5000/feed', {
+      const response = await axios.post(`${BASE_URL}/feed`, {
         user_id: user.id
       });
       setPosts(response.data.posts || []);
@@ -32,6 +27,17 @@ const Feed = () => {
     }
   };
 
+  // Expose fetchFeed method to parent component
+  useImperativeHandle(ref, () => ({
+    fetchFeed
+  }));
+
+  useEffect(() => {
+    if (user) {
+      fetchFeed();
+    }
+  }, [user]);
+
   const handleViewPost = (postId) => {
     navigate(`/post/${postId}`);
   };
@@ -40,7 +46,7 @@ const Feed = () => {
 
   const handleLikePost = async (postId) => {
     try {
-      await axios.post('http://127.0.0.1:5000/post/like', {
+      await axios.post(`${BASE_URL}/post/like`, {
         user_id: user.id,
         post_id: postId
       });
@@ -124,7 +130,7 @@ const Feed = () => {
                 {post.photo_path && (
                   <div className="post-photo">
                     <img 
-                      src={`http://127.0.0.1:5000/${post.photo_path}`} 
+                      src={`${BASE_URL}/${post.photo_path}`} 
                       alt="Post photo" 
                       className="post-image"
                     />
@@ -160,6 +166,6 @@ const Feed = () => {
 
     </div>
   );
-};
+});
 
 export default Feed; 

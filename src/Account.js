@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
+const BASE_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:5000";
+
 function Account() {
   const { user, setUser } = useUser();
   const [editMode, setEditMode] = useState(false);
@@ -25,7 +27,7 @@ function Account() {
   const fetchData = async () => {
     if (!user) return;
     try {
-      const response = await axios.post("http://127.0.0.1:5000/account", {
+      const response = await axios.post(`${BASE_URL}/account`, {
         name: user.name,
         id: user.id,
       });
@@ -78,7 +80,7 @@ function Account() {
 
   const handleSave = async () => {
     try {
-      await axios.post("http://127.0.0.1:5000/account/edit", {
+      await axios.post(`${BASE_URL}/account/edit`, {
         name: user.name,
         ...form,
       });

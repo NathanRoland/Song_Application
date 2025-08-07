@@ -1,4 +1,4 @@
-from api import *
+#from api import *
 import json
 import requests
 import subprocess
@@ -141,9 +141,9 @@ def format_audd_result(result):
                 #print(mb[0])
                 release_id = mb[0]["releases"][-1]["id"]
                 print(release_id)
-                create_song(recording_id, track_info["title"], artist_ids[0], artist_ids[1], artist_ids[2], artist_ids[3], track_info["release_date"], track_info["timecode"], False, 0, 0, 0, release_id, None)
+                create_song(recording_id, track_info["title"], artist_ids[0], artist_ids[1], artist_ids[2], artist_ids[3], track_info["release_date"], track_info["timecode"], False, 0, 0, 0, release_id, get_release_pic_for_release(release_id))
                 if len(get_release_info(release_id)) == 0:
-                    create_release(release_id, track_info["title"], artist_ids[0], artist_ids[1], artist_ids[2], artist_ids[3], track_info["release_date"], track_info["timecode"], False, False, False, False, None)
+                    create_release(release_id, track_info["title"], artist_ids[0], artist_ids[1], artist_ids[2], artist_ids[3], track_info["release_date"], track_info["timecode"], False, False, False, False, get_release_pic_for_release(release_id))
         else:
             print("song id found")
             track_info["musicbrainz_id"] = recording_id
@@ -168,8 +168,8 @@ def format_audd_result(result):
         print("release id")
         print(release_id)
         if len(get_song_info(release_id)) == 0:
-            create_song(release_id, track_info["title"], artist_ids[0], artist_ids[1], artist_ids[2], artist_ids[3], track_info["release_date"], track_info["timecode"], False, 0, 0, 0, release_id, None)
-            create_release(release_id, track_info["title"], artist_ids[0], artist_ids[1], artist_ids[2], artist_ids[3], track_info["release_date"], track_info["timecode"], False, False, False, False, None)
+            create_song(release_id, track_info["title"], artist_ids[0], artist_ids[1], artist_ids[2], artist_ids[3], track_info["release_date"], track_info["timecode"], False, 0, 0, 0, release_id, get_release_pic_for_release(release_id))
+            create_release(release_id, track_info["title"], artist_ids[0], artist_ids[1], artist_ids[2], artist_ids[3], track_info["release_date"], track_info["timecode"], False, False, False, False, get_release_pic_for_release(release_id))
         track_info["musicbrainz_id"] = release_id
 
 

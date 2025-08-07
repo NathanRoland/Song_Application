@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import { useUser } from "./userContext";
 import PostModal from "./PostModal";
@@ -7,6 +7,7 @@ import Feed from "./Feed";
 function Home() {
   const { user } = useUser();
   const [isPostModalOpen, setIsPostModalOpen] = useState(false);
+  const feedRef = useRef();
 
   const handlePostClick = () => {
     setIsPostModalOpen(true);
@@ -14,6 +15,13 @@ function Home() {
 
   const handleClosePostModal = () => {
     setIsPostModalOpen(false);
+  };
+
+  const handlePostCreated = () => {
+    // Refresh the feed when a post is created
+    if (feedRef.current && feedRef.current.fetchFeed) {
+      feedRef.current.fetchFeed();
+    }
   };
 
   // If user is not logged in, show the welcome page
@@ -76,12 +84,13 @@ function Home() {
       </button>
 
       {/* Feed Component */}
-      <Feed />
+      <Feed ref={feedRef} />
 
       {/* Post Modal */}
       <PostModal 
         isOpen={isPostModalOpen}
         onClose={handleClosePostModal}
+        onPostCreated={handlePostCreated}
       />
     </div>
   );

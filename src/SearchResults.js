@@ -3,6 +3,8 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import './SearchResults.css';
 
+const BASE_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:5000";
+
 const SearchResults = () => {
   const [searchResults, setSearchResults] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -25,7 +27,7 @@ const SearchResults = () => {
       setLoading(true);
       setError(null);
       
-      const response = await axios.post('http://127.0.0.1:5000/search', {
+      const response = await axios.post(`${BASE_URL}/search`, {
         search: query
       });
 

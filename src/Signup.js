@@ -3,6 +3,8 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "./userContext";
 
+const BASE_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:5000";
+
 function Signup() {
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
@@ -13,7 +15,7 @@ function Signup() {
 
   const sendDataToFlask = async () => {
     try {
-      const response = await axios.post("http://127.0.0.1:5000/signup/user", {
+      const response = await axios.post(`${BASE_URL}/signup/user`, {
         name: name,
         password: password,
         email: email

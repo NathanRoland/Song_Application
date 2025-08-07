@@ -1,15 +1,15 @@
-from sqlalchemy import create_engine, select, delete, func, update
+from sqlalchemy import create_engine, select, delete, func, update, text
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import PendingRollbackError, IntegrityError
 from classes import *
-from sqlalchemy import text
-from user import *
+import os
+from database_manager import engine, execute_with_retry
+
 from pathlib import Path
-from user import *
+from datetime import datetime
 
 # creates the database directory
 Path("database").mkdir(exist_ok=True)
-engine = create_engine("sqlite:///database/main.db", echo=False)
 
 # initializes the database
 Base.metadata.create_all(engine)
@@ -50,15 +50,6 @@ def get_artist_id(username: str):
 def get_artist_name(artist_id: str):
     with Session(engine) as session:
         return session.execute(select(Artist.username).where(Artist.artist_id == artist_id)).all()
-
-def get_username(user_id: int):
-    with Session(engine) as session:
-        return session.execute(select(Artist.username).where(Artist.artist_id == user_id)).all()
-
-def set_username(user_id: int, username: str):
-    with Session(engine) as session:
-        session.execute(update(Artist).where(Artist.artist_id == user_id).values(username=username))
-        session.commit()
 
 def get_password(user_id: int):
     with Session(engine) as session:

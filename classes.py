@@ -30,7 +30,7 @@ class User(Base):
     postcode: Mapped[str] = mapped_column(String, nullable=True)
     date_of_birth: Mapped[DateTime] = mapped_column(DateTime, nullable=True)
     isArtist: Mapped[bool] = mapped_column(Boolean, nullable=True)
-    email: Mapped[str] = mapped_column(String, unique=True)
+    email: Mapped[str] = mapped_column(String)
     #username, password, favourite artist, bio, favourite song, pfp, links to other socials
     #artist following
     #friends
@@ -47,7 +47,7 @@ class Song(Base):
     artist_id_3: Mapped[str] = mapped_column(String, nullable=True)
     artist_id_4: Mapped[str] = mapped_column(String, nullable=True)
     release_date: Mapped[str] = mapped_column(String, nullable=True)
-    time: Mapped[int] = mapped_column(Integer, nullable=True)
+    time: Mapped[str] = mapped_column(String, nullable=True)
     unreleased: Mapped[bool] = mapped_column(Boolean, nullable=True)
     apl_plays: Mapped[int] = mapped_column(Integer, nullable=True)
     spt_plays: Mapped[int] = mapped_column(Integer, nullable=True)
@@ -64,7 +64,7 @@ class Release(Base):
     artist_id_3: Mapped[str] = mapped_column(String, nullable=True)
     artist_id_4: Mapped[str] = mapped_column(String, nullable=True)
     release_date: Mapped[str] = mapped_column(String, nullable=True)
-    time: Mapped[int] = mapped_column(Integer, nullable=True)
+    time: Mapped[str] = mapped_column(String, nullable=True)
     unreleased: Mapped[bool] = mapped_column(Boolean, nullable=True)
     is_album: Mapped[bool] = mapped_column(Boolean, nullable=True)
     is_EP: Mapped[bool] = mapped_column(Boolean, nullable=True)

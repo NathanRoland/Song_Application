@@ -24,7 +24,7 @@ import tempfile
 
 app = Flask(__name__)
 CORS(app)
-
+load_dotenv()
 
 # secret key used to sign the session cookie
 app.config['SECRET_KEY'] = secrets.token_hex()
@@ -91,6 +91,11 @@ def signup_user():
 def post():
     try:
         user_id = request.form.get("user_id")
+        
+        # Ensure user_id is a string
+        if user_id is not None:
+            user_id = str(user_id)
+        
         post_title = request.form.get("post_title")
         post_text = request.form.get("post_text")
         
@@ -146,26 +151,25 @@ def view_post():
         # Get username for the comment author
         username_result = get_username(comment[1])
         username = username_result[0][0] if username_result and username_result[0] else f"User {comment[1]}"
-        
         comment_info = {
             "comment_id": comment[0],
             "user_id": comment[1],
             "username": username,
-            "post_id": comment[2],
-            "comment_text": comment[3],
-            "time": comment[4],
-            "likes": comment[5],
-            "parent_comment_id": comment[6],
+            "post_id": post_id,
+            "comment_text": comment[2],
+            "time": comment[3],
+            "likes": comment[4],
+            "parent_comment_id": comment[5],
             "replies": []
         }
         
         comments_dict[comment[0]] = comment_info
         
-        if comment[6] == 0 or comment[6] is None:  # Top-level comment
+        if comment[5] == 0 or comment[5] is None:  # Top-level comment
             top_level_comments.append(comment_info)
         else:  # Reply to another comment
-            if comment[6] in comments_dict:
-                comments_dict[comment[6]]["replies"].append(comment_info)
+            if comment[5] in comments_dict:
+                comments_dict[comment[5]]["replies"].append(comment_info)
     
     post_comment_info = top_level_comments
     post_info["comments"] = post_comment_info
@@ -196,11 +200,20 @@ def get_feed():
     try:
         data = request.json
         user_id = data.get("user_id")
+        print(f"Received user_id: {user_id}, type: {type(user_id)}")
+        
+        # Ensure user_id is a string
+        if user_id is not None:
+            user_id = str(user_id)
+            print(f"Converted user_id to string: {user_id}")
+        
         #friends = get_friends(user_id)
         if not user_id:
             return jsonify({"error": "user_id required"}), 400
         feed_posts = get_posts_from_user_id(user_id)
         feed_posts_info = []
+        print(feed_posts)
+        print(user_id)
         for post in feed_posts:
             user_name = get_username(user_id)[0][0]
             print(user_name)
@@ -227,6 +240,10 @@ def like_post():
         data = request.json
         user_id = data.get("user_id")
         post_id = data.get("post_id")
+        
+        # Ensure user_id is a string
+        if user_id is not None:
+            user_id = str(user_id)
         
         if not all([user_id, post_id]):
             return jsonify({"error": "Missing required fields"}), 400

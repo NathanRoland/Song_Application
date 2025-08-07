@@ -2,13 +2,15 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
 
+const BASE_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:5000";
+
 function Hot100Chart() {
   const [chart, setChart] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    axios.get("http://127.0.0.1:5000/charts/billboard/hot-100")
+    axios.get(`${BASE_URL}/charts/billboard/hot-100`)
       .then(res => {
         setChart(res.data.chart);
         setLoading(false);

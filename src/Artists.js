@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
 
+const BASE_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:5000";
+
 function Artists() {
   const [search, setSearch] = useState("");
   const [results, setResults] = useState([]);
@@ -18,7 +20,7 @@ function Artists() {
     setError(null);
     setResults([]);
     try {
-      const response = await axios.post("http://127.0.0.1:5000/artists", {
+      const response = await axios.post(`${BASE_URL}/artists`, {
         artist: search,
       });
       if (response.data && response.data.artists) {

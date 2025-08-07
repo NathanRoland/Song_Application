@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { useParams, useLocation, Link } from "react-router-dom";
 import axios from "axios";
 
+const BASE_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:5000";
+
 function DisplaySong() {
   const { id } = useParams();
   const location = useLocation();
@@ -17,7 +19,7 @@ function DisplaySong() {
       setLoading(true);
       setError(null);
       try {
-        const response = await axios.post("http://127.0.0.1:5000/song/info", { song_id: id });
+        const response = await axios.post(`${BASE_URL}/song/info`, { song_id: id });
         setSong(response.data.song);
       } catch (err) {
         setError("Failed to fetch song info.");

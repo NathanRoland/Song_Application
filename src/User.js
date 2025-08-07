@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
+const BASE_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:5000";
+
 function User() {
   const { user } = useUser(); // Get user from context
   const [name, setName] = useState([]);
@@ -21,7 +23,7 @@ function User() {
       return <h1>No user data found!</h1>;
     }else{
       try {
-        const response = await axios.post("http://127.0.0.1:5000/user", {  
+        const response = await axios.post(`${BASE_URL}/user`, {  
         });
         if (response.data){
             setName(response.data.name)

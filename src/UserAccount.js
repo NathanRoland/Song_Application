@@ -3,6 +3,8 @@ import { useUser } from './userContext';
 import axios from 'axios';
 import './UserAccount.css';
 
+const BASE_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:5000";
+
 const UserAccount = () => {
   const { user } = useUser();
   const [userInfo, setUserInfo] = useState(null);
@@ -26,7 +28,7 @@ const UserAccount = () => {
   const fetchUserInfo = async () => {
     try {
       setLoading(true);
-      const response = await axios.post('http://127.0.0.1:5000/account', {
+      const response = await axios.post(`${BASE_URL}/account`, {
         name: typeof user === 'string' ? user : user.name || user,
         id: typeof user === 'object' && user.id ? user.id : user
       });
@@ -61,7 +63,7 @@ const UserAccount = () => {
         throw new Error('No valid user ID');
       }
       
-      const response = await axios.post('http://127.0.0.1:5000/account/friend_requests', {
+      const response = await axios.post(`${BASE_URL}/account/friend_requests`, {
         user_id: userId
       });
       setFriendRequests(response.data);
@@ -87,7 +89,7 @@ const UserAccount = () => {
   const handleSave = async () => {
     try {
       setLoading(true);
-      await axios.post('http://127.0.0.1:5000/account/edit', {
+      await axios.post(`${BASE_URL}/account/edit`, {
         name: user.name,
         id: user.id,
         ...editForm
@@ -120,7 +122,7 @@ const UserAccount = () => {
         return;
       }
       
-      await axios.post('http://127.0.0.1:5000/account/view/accept_friend', {
+      await axios.post(`${BASE_URL}/account/view/accept_friend`, {
         user_id: currentUserId,
         friend_id: friendUserId
       });
@@ -143,7 +145,7 @@ const UserAccount = () => {
         return;
       }
       
-      await axios.post('http://127.0.0.1:5000/account/view/reject_friend', {
+      await axios.post(`${BASE_URL}/account/view/reject_friend`, {
         user_id: currentUserId,
         friend_id: friendUserId
       });
@@ -166,7 +168,7 @@ const UserAccount = () => {
         return;
       }
       
-      await axios.post('http://127.0.0.1:5000/account/remove_sent_request', {
+      await axios.post(`${BASE_URL}/account/remove_sent_request`, {
         user_id: currentUserId,
         friend_id: friendUserId
       });
@@ -181,7 +183,7 @@ const UserAccount = () => {
 
   const getUserIdByUsername = async (username) => {
     try {
-      const response = await axios.post('http://127.0.0.1:5000/account/get_user_id_by_username', {
+      const response = await axios.post(`${BASE_URL}/account/get_user_id_by_username`, {
         username: username
       });
       return response.data.user_id;
