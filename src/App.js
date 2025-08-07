@@ -2,7 +2,6 @@ import { BrowserRouter as Router, Routes, Route, Outlet } from "react-router-dom
 import Home from "./Home";
 import Signup from "./Signup";
 import Login from "./Login";
-import Account from "./Account";
 import Search from "./Search";
 import User from "./User";
 import Songs from "./Songs";

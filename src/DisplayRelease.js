@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
-import { useUser } from "./userContext";
+import { useParams } from "react-router-dom";
 import axios from "axios";
 import { API_BASE_URL } from './config';
 
@@ -9,7 +8,6 @@ function DisplayRelease() {
   const [release, setRelease] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [artistNames, setArtistNames] = useState([]);
 
   useEffect(() => {
     async function fetchRelease() {

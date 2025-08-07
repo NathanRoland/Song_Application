@@ -11,7 +11,7 @@ const PostModal = ({ isOpen, onClose, postId = null, onPostCreated }) => {
   const [selectedPhoto, setSelectedPhoto] = useState(null);
   const [photoPreview, setPhotoPreview] = useState(null);
 
-  const [isCreating, setIsCreating] = useState(!postId);
+  const [isCreating] = useState(!postId);
   const [postData, setPostData] = useState(null);
   const [commentText, setCommentText] = useState('');
   const [loading, setLoading] = useState(false);

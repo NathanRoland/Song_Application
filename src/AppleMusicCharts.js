@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useCallback } from "react";
 import axios from "axios";
 import { API_BASE_URL } from './config';
 import './SpotifyCharts.css';
@@ -13,20 +13,7 @@ const AppleMusicCharts = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const fetchChartData = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await axios.post(`${API_BASE_URL}/charts/apple_music`, {
-        country: selectedCountry
-      });
-      setChartData(response.data.data || {});
-    } catch (err) {
-      setError('Failed to fetch Apple Music chart data. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  }, [selectedCountry]);
+
 
 
 
