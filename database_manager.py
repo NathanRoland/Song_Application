@@ -25,9 +25,9 @@ def create_engine_with_retry():
     """Create SQLAlchemy engine with connection pooling and retry logic"""
     
     if DATABASE_URL.startswith('postgresql'):
-        # PostgreSQL configuration with connection pooling
+        # PostgreSQL configuration with connection pooling using psycopg3
         engine = create_engine(
-            DATABASE_URL,
+            DATABASE_URL.replace('postgresql://', 'postgresql+psycopg://'),
             echo=False,
             poolclass=QueuePool,
             pool_size=5,  # Number of connections to maintain

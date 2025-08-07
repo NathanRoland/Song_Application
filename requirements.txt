@@ -2,7 +2,7 @@ Flask==2.3.3
 Flask-CORS==4.0.0
 Flask-SocketIO==5.3.6
 SQLAlchemy>=2.0.35
-psycopg2-binary==2.9.9
+psycopg[binary]>=3.1.0
 requests>=2.32.3
 python-dotenv==1.0.0
 billboard==0.4.0
