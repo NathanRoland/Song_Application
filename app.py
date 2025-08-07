@@ -75,6 +75,34 @@ def health_check():
             "timestamp": str(datetime.datetime.now())
         }), 500
 
+@app.route("/test")
+def test_endpoint():
+    return jsonify({
+        "message": "Test endpoint working",
+        "timestamp": str(datetime.datetime.now())
+    })
+
+@app.route("/artists/test", methods=["POST"])
+def test_artists():
+    try:
+        data = request.json
+        artist_name = data.get("artist", "test") if data else "test"
+        
+        return jsonify({
+            "message": "Artists test endpoint working",
+            "artist": artist_name,
+            "artists": [
+                {"id": "test1", "name": "Test Artist 1", "country": "Test Country", "genre": "Test Genre"},
+                {"id": "test2", "name": "Test Artist 2", "country": "Test Country", "genre": "Test Genre"}
+            ],
+            "timestamp": str(datetime.datetime.now())
+        })
+    except Exception as e:
+        return jsonify({
+            "error": f"Test endpoint error: {str(e)}",
+            "timestamp": str(datetime.datetime.now())
+        }), 500
+
 @app.route("/login", methods=['Get'])
 
 # handles a post request when the user clicks the log in button
@@ -648,43 +676,77 @@ def artist_info():
 
 @app.route("/artists", methods=["POST"])
 def get_artists():
-    print("test")
-    data = request.json
-    data_artist_name = data.get("artist")
-    artists = searchForLikeArtists(data_artist_name)
-    all_artists = []
-    if len(artists) <= 1:
-        artist_info = get_artist_from_musicbrainz(data_artist_name)
-        for artist in artist_info:
-            
-            if len(get_username(artist["id"])) == 0:
-                if "area" not in artist:
-                    create_artist(artist["id"], artist["name"], None, None, None, None, None, None, None, None, None, None)
-                else:
+    try:
+        print("🔍 Artists endpoint called")
+        data = request.json
+        print(f"📝 Received data: {data}")
+        
+        if not data:
+            return jsonify({"error": "No data provided", "artists": []}), 400
+        
+        data_artist_name = data.get("artist")
+        print(f"🎵 Searching for artist: {data_artist_name}")
+        
+        if not data_artist_name:
+            return jsonify({"error": "No artist name provided", "artists": []}), 400
+        
+        artists = searchForLikeArtists(data_artist_name)
+        print(f"🎯 Found {len(artists)} artists in database")
+        
+        all_artists = []
+        if len(artists) <= 1:
+            print("🔍 Searching MusicBrainz for artist info")
+            try:
+                artist_info = get_artist_from_musicbrainz(data_artist_name)
+                print(f"🎵 MusicBrainz returned {len(artist_info)} artists")
+                
+                for artist in artist_info:
+                    if len(get_username(artist["id"])) == 0:
+                        if "area" not in artist:
+                            create_artist(artist["id"], artist["name"], None, None, None, None, None, None, None, None, None, None)
+                        else:
+                            if artist.get("area") is not None:
+                                create_artist(artist["id"], artist["name"], None, None, None, None, None, None, None, None, artist["area"]["name"], None)
+                            else:
+                                create_artist(artist["id"], artist["name"], None, None, None, None, None, None, None, None, None, None)
+                    
                     if artist.get("area") is not None:
-                        create_artist(artist["id"], artist["name"], None, None, None, None, None, None, None, None, artist["area"]["name"], None)
+                        all_artists.append({"id": artist["id"], "name": artist["name"], "country": artist["area"]["name"], "genre": None})
                     else:
-                        create_artist(artist["id"], artist["name"], None, None, None, None, None, None, None, None, None, None)
-            if artist.get("area") is not None:
-                all_artists.append({"id": artist["id"], "name": artist["name"], "country": artist["area"]["name"], "genre": None})
-            else:
-                all_artists.append({"id": artist["id"], "name": artist["name"], "country": None, "genre": None})
-    else:
-        for artist in artists:
-            print(artist)
-            country = get_country(artist[0])
-            country_value = country[0][0] if country and country[0] else None
-            genre = get_genre(artist[0])
-            genre_value = genre[0][0] if genre and genre[0] else None
-            all_artists.append({
-                "id": artist[0],
-                "name": artist[1],
-                "country": country_value,
-                "genre": genre_value
-            })
-        #data_artist_id = searchForLikeArtists(data_artist_name)
-        #print(data_artist_id)
-    return jsonify({"artists": all_artists})
+                        all_artists.append({"id": artist["id"], "name": artist["name"], "country": None, "genre": None})
+            except Exception as e:
+                print(f"❌ Error getting artist from MusicBrainz: {e}")
+                return jsonify({"error": f"Failed to get artist info: {str(e)}", "artists": []}), 500
+        else:
+            for artist in artists:
+                print(f"🎵 Processing artist: {artist}")
+                try:
+                    country = get_country(artist[0])
+                    country_value = country[0][0] if country and country[0] else None
+                    genre = get_genre(artist[0])
+                    genre_value = genre[0][0] if genre and genre[0] else None
+                    all_artists.append({
+                        "id": artist[0],
+                        "name": artist[1],
+                        "country": country_value,
+                        "genre": genre_value
+                    })
+                except Exception as e:
+                    print(f"❌ Error processing artist {artist}: {e}")
+                    # Continue with other artists
+                    all_artists.append({
+                        "id": artist[0],
+                        "name": artist[1],
+                        "country": None,
+                        "genre": None
+                    })
+        
+        print(f"✅ Returning {len(all_artists)} artists")
+        return jsonify({"artists": all_artists})
+        
+    except Exception as e:
+        print(f"❌ Error in get_artists: {e}")
+        return jsonify({"error": f"Server error: {str(e)}", "artists": []}), 500
 
 @app.route("/songs", methods=["POST"])
 def get_songs():

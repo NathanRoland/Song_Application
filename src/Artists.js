@@ -18,17 +18,29 @@ function Artists() {
     setLoading(true);
     setError(null);
     setResults([]);
+    
+    console.log("🔍 Submitting artist search:", search);
+    console.log("🌐 API URL:", `${API_BASE_URL}/artists`);
+    
     try {
       const response = await axios.post(`${API_BASE_URL}/artists`, {
         artist: search,
       });
+      
+      console.log("📡 Response received:", response);
+      console.log("📄 Response data:", response.data);
+      
       if (response.data && response.data.artists) {
+        console.log("✅ Setting results:", response.data.artists);
         setResults(response.data.artists);
       } else {
+        console.log("⚠️ No artists in response");
         setResults([]);
       }
     } catch (err) {
-      setError("Failed to fetch artists.");
+      console.error("❌ Error fetching artists:", err);
+      console.error("❌ Error response:", err.response);
+      setError(`Failed to fetch artists: ${err.message}`);
     } finally {
       setLoading(false);
     }
