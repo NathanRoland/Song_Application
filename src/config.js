@@ -11,7 +11,7 @@ const getApiUrl = () => {
   }
   
   // For production, use the deployed backend
-  return "https://song-application-p2ab.onrender.com";
+  return "https://dub-finder-backend.onrender.com";
 };
 
 export const API_BASE_URL = getApiUrl(); 

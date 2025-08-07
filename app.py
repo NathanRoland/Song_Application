@@ -51,7 +51,7 @@ def after_request(response):
     # Check if the origin is in our allowed list
     allowed_origins = [
         "https://song-application.vercel.app",
-        "https://song-application-p2ab.onrender.com", 
+        "https://dub-finder-backend.onrender.com", 
         "http://localhost:3000",
         "http://127.0.0.1:3000",
         "http://localhost:5000",
@@ -83,7 +83,7 @@ def options_handler(path):
     
     allowed_origins = [
         "https://song-application.vercel.app",
-        "https://song-application-p2ab.onrender.com", 
+        "https://dub-finder-backend.onrender.com", 
         "http://localhost:3000",
         "http://127.0.0.1:3000",
         "http://localhost:5000",
@@ -176,25 +176,42 @@ def login_user_options():
 # handles a post request when the user clicks the log in button
 @app.route("/login/user", methods=["POST"])
 def login_user():
-    data=request.json
-    print("recieved:data", data)
-    if not request.is_json:
-        abort(404)
-    name = data.get('name')
-    password = data.get('password')
-    user_password = get_user_password(name)
-    if len(user_password) == 0:
-        redirect_url = "http://localhost:3000/login"
-        return jsonify({"redirect_url": redirect_url})
-    print(user_password)
-    if password != user_password[0][0]:
-        redirect_url = "http://localhost:3000/login"
-        return jsonify({"redirect_url": redirect_url})
-    else:
-        print("logged_in")
-        user_id = get_user_id_by_username(name)
-        print(user_id)
-        return jsonify({"user": name, "id": user_id})
+    try:
+        print("🔐 Login endpoint called")
+        data = request.json
+        print(f"📝 Received data: {data}")
+        
+        if not request.is_json:
+            print("❌ Request is not JSON")
+            return jsonify({"error": "Invalid request format"}), 400
+        
+        name = data.get('name')
+        password = data.get('password')
+        
+        if not name or not password:
+            print("❌ Missing name or password")
+            return jsonify({"error": "Missing name or password"}), 400
+        
+        print(f"👤 Attempting login for user: {name}")
+        user_password = get_user_password(name)
+        
+        if len(user_password) == 0:
+            print(f"❌ User not found: {name}")
+            return jsonify({"error": "User not found"}), 404
+        
+        print(f"🔑 Password check for user: {name}")
+        if password != user_password[0][0]:
+            print(f"❌ Invalid password for user: {name}")
+            return jsonify({"error": "Invalid password"}), 401
+        else:
+            print(f"✅ Login successful for user: {name}")
+            user_id = get_user_id_by_username(name)
+            print(f"🆔 User ID: {user_id}")
+            return jsonify({"user": name, "id": user_id})
+            
+    except Exception as e:
+        print(f"❌ Error in login_user: {str(e)}")
+        return jsonify({"error": f"Server error: {str(e)}"}), 500
 
 @app.route("/main")
 def main():
@@ -205,24 +222,37 @@ def main():
 
 @app.route("/signup/user", methods=["POST"])
 def signup_user():
-    print("test")
-    data=request.json
-    print("recieved:data", data)
-    if not request.is_json:
-        abort(404)
-    name = data.get('name')
-    password = data.get('password')
-    email = data.get('email')
-    
-    if get_user(name) is None:
-        print(name)
-        createUser(name, password, email)
-        user_id = get_user_id_by_username(name)
-        print(user_id)
-        return jsonify({"user": name, "id": user_id})
-    else:
-        redirect_url = "http://localhost:3000/signup"
-        return jsonify({"redirect_url": redirect_url})
+    try:
+        print("📝 Signup endpoint called")
+        data = request.json
+        print(f"📝 Received data: {data}")
+        
+        if not request.is_json:
+            print("❌ Request is not JSON")
+            return jsonify({"error": "Invalid request format"}), 400
+        
+        name = data.get('name')
+        password = data.get('password')
+        email = data.get('email')
+        
+        if not name or not password or not email:
+            print("❌ Missing required fields")
+            return jsonify({"error": "Missing required fields"}), 400
+        
+        print(f"👤 Checking if user exists: {name}")
+        if get_user(name) is None:
+            print(f"✅ Creating new user: {name}")
+            createUser(name, password, email)
+            user_id = get_user_id_by_username(name)
+            print(f"🆔 New user ID: {user_id}")
+            return jsonify({"user": name, "id": user_id})
+        else:
+            print(f"❌ User already exists: {name}")
+            return jsonify({"error": "User already exists"}), 409
+            
+    except Exception as e:
+        print(f"❌ Error in signup_user: {str(e)}")
+        return jsonify({"error": f"Server error: {str(e)}"}), 500
 
 @app.route("/post/publish", methods=["POST"])
 def post():

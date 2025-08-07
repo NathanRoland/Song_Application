@@ -14,23 +14,38 @@ function Signup() {
 
   const sendDataToFlask = async () => {
     try {
+      console.log("📝 Attempting signup...");
+      console.log("🌐 API URL:", `${API_BASE_URL}/signup/user`);
+      
       const response = await axios.post(`${API_BASE_URL}/signup/user`, {
         name: name,
         password: password,
         email: email
       });
 
+      console.log("📡 Signup response:", response.data);
+
       if (response.data.user){
+        console.log("✅ Signup successful");
         const newUser = { name: response.data.user,
           id: response.data.id };
 
         setUser(newUser);
         navigate("/account")
+      } else if (response.data.error) {
+        console.error("❌ Signup error:", response.data.error);
+        alert(`Signup failed: ${response.data.error}`);
       }
-      console.log(response.data)
       
     } catch (error) {
-      console.error("Error sending data:", error);
+      console.error("❌ Error sending data:", error);
+      console.error("❌ Error response:", error.response);
+      
+      if (error.response && error.response.data && error.response.data.error) {
+        alert(`Signup failed: ${error.response.data.error}`);
+      } else {
+        alert("Signup failed: Network error. Please try again.");
+      }
     }
   };
 

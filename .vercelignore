@@ -1,0 +1,78 @@
+# Backend files that should not be deployed to Vercel (frontend)
+*.py
+requirements.txt
+app.py
+*.db
+Database/
+photos/
+*.sql
+gunicorn.conf.py
+Procfile
+runtime.txt
+.python-version
+
+# Backend-specific files
+acoutid.py
+artist.py
+classes.py
+clear_users.py
+comments.py
+database_manager.py
+kworb_scraper.py
+music_data.py
+playlist.py
+post.py
+reset_*.py
+song.py
+spotifyData.py
+user.py
+websitedummy/
+
+# Python cache and virtual environments
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Test files
+test_*.py
+*_test.py
+*_FIX.md
+*_DEPLOYMENT.md
+*_TROUBLESHOOTING.md 
