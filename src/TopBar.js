@@ -54,7 +54,7 @@ function TopBar() {
     if (menuOpen && user && !userInfo) {
       fetchUserInfo();
     }
-  }, [menuOpen, user]);
+  }, [menuOpen, user, fetchUserInfo, userInfo]);
 
   return (
     <nav style={{

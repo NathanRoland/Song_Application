@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import React, { useState, useEffect, useCallback } from "react";
+import { useParams } from "react-router-dom";
 import { useUser } from "./userContext";
 import axios from "axios";
 import { API_BASE_URL } from './config';
@@ -8,25 +8,12 @@ import "./ViewOtherAccount.css";
 const ViewOtherAccount = () => {
   const { user } = useUser();
   const { userId } = useParams();
-  const navigate = useNavigate();
   const [userInfo, setUserInfo] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [friendStatus, setFriendStatus] = useState('loading');
 
-  useEffect(() => {
-    if (userId) {
-      fetchUserInfo();
-    }
-  }, [userId]);
-
-  useEffect(() => {
-    if (user && userId) {
-      checkFriendStatus();
-    }
-  }, [user, userId]);
-
-  const fetchUserInfo = async () => {
+  const fetchUserInfo = useCallback(async () => {
     try {
       setLoading(true);
       const response = await axios.post(`${API_BASE_URL}/account/view`, {
@@ -38,9 +25,9 @@ const ViewOtherAccount = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [userId]);
 
-  const checkFriendStatus = async () => {
+  const checkFriendStatus = useCallback(async () => {
     if (!user || !userId) return;
     
     try {
@@ -54,7 +41,21 @@ const ViewOtherAccount = () => {
       console.error('Failed to check friend status:', err);
       setFriendStatus('error');
     }
-  };
+  }, [user, userId]);
+
+  useEffect(() => {
+    if (userId) {
+      fetchUserInfo();
+    }
+  }, [userId, fetchUserInfo]);
+
+  useEffect(() => {
+    if (user && userId) {
+      checkFriendStatus();
+    }
+  }, [user, userId, checkFriendStatus]);
+
+
 
   const handleAddFriend = async () => {
     if (!user) {

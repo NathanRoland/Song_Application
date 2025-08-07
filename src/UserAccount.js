@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect, useCallback } from "react";
 import { useUser } from "./userContext";
 import axios from "axios";
 import { API_BASE_URL } from './config';
@@ -16,16 +15,8 @@ const UserAccount = () => {
   const [friendRequestsLoading, setFriendRequestsLoading] = useState(false);
   const [friendRequestsError, setFriendRequestsError] = useState(null);
   const [friends, setFriends] = useState([]);
-  const [friendsLoading, setFriendsLoading] = useState(false);
 
-  useEffect(() => {
-    if (user && user !== '') {
-      fetchUserInfo();
-      // fetchFriendRequests(); // Commented out since we get friend requests from main account endpoint
-    }
-  }, [user]);
-
-  const fetchUserInfo = async () => {
+  const fetchUserInfo = useCallback(async () => {
     try {
       setLoading(true);
       const response = await axios.post(`${API_BASE_URL}/account`, {
@@ -51,7 +42,16 @@ const UserAccount = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
+
+  useEffect(() => {
+    if (user && user !== '') {
+      fetchUserInfo();
+      // fetchFriendRequests(); // Commented out since we get friend requests from main account endpoint
+    }
+  }, [user, fetchUserInfo]);
+
+
 
   const fetchFriendRequests = async () => {
     try {

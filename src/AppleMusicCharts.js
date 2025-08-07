@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
-import { Link } from "react-router-dom";
 import { API_BASE_URL } from './config';
 import './SpotifyCharts.css';
 
@@ -14,12 +13,7 @@ const AppleMusicCharts = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    fetchChartData();
-    // eslint-disable-next-line
-  }, [selectedCountry]);
-
-  const fetchChartData = async () => {
+  const fetchChartData = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -32,7 +26,9 @@ const AppleMusicCharts = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedCountry]);
+
+
 
   return (
     <div className="spotify-charts-container">
