@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { useUser } from "./userContext";
 import axios from "axios";
 import { API_BASE_URL } from './config';
 import "./SearchResults.css";

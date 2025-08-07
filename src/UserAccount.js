@@ -53,29 +53,7 @@ const UserAccount = () => {
 
 
 
-  const fetchFriendRequests = async () => {
-    try {
-      setFriendRequestsLoading(true);
-      setFriendRequestsError(null);
-      
-      const userId = typeof user === 'object' && user.id ? user.id : user;
-      if (!userId) {
-        throw new Error('No valid user ID');
-      }
-      
-      const response = await axios.post(`${API_BASE_URL}/account/friend_requests`, {
-        user_id: userId
-      });
-      setFriendRequests(response.data);
-    } catch (err) {
-      console.error('Failed to load friend requests:', err);
-      setFriendRequestsError('Failed to load friend requests');
-      // Set default empty state to prevent undefined errors
-      setFriendRequests({ received: [], sent: [] });
-    } finally {
-      setFriendRequestsLoading(false);
-    }
-  };
+
 
   const handleEdit = () => {
     setIsEditing(true);

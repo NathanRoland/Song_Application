@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useUser } from "./userContext";
 import axios from "axios";
 import { API_BASE_URL } from './config';
 import "./SearchBar.css";
@@ -10,7 +9,6 @@ const SearchBar = () => {
   const [searchResults, setSearchResults] = useState(null);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [expandedSections, setExpandedSections] = useState({});
   const searchRef = useRef(null);
   const navigate = useNavigate();
 

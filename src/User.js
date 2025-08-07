@@ -48,7 +48,7 @@ function User() {
     <div>
       <h1>{name}!</h1>
       <p>{bio}</p>
-      <img src={pfp_path} alt="Profile picture" />
+      <img src={pfp_path} alt="" />
       <p>{fav_artist}</p>
       <p>{friends}</p>
       <p>{following}</p>

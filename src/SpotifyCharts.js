@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
-import { Link } from "react-router-dom";
 import { API_BASE_URL } from './config';
 import "./SpotifyCharts.css";
 
@@ -42,11 +41,7 @@ const SpotifyCharts = () => {
     'Burundi', 'Ethiopia', 'Eritrea', 'Djibouti', 'Somalia', 'Somaliland'
   ];
 
-  useEffect(() => {
-    fetchChartData();
-  }, [selectedCountry, chartType]);
-
-  const fetchChartData = async () => {
+  const fetchChartData = useCallback(async () => {
     setLoading(true);
     setError(null);
     
@@ -63,7 +58,11 @@ const SpotifyCharts = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedCountry, chartType]);
+
+  useEffect(() => {
+    fetchChartData();
+  }, [fetchChartData]);
 
   const formatNumber = (num) => {
     if (!num) return '0';

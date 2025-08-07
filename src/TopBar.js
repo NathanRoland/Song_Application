@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useUser } from "./userContext";
 import SearchBar from "./SearchBar";
@@ -30,7 +30,7 @@ function TopBar() {
     navigate("/");
   };
 
-  const fetchUserInfo = async () => {
+  const fetchUserInfo = useCallback(async () => {
     if (!user) return;
     
     try {
@@ -48,7 +48,7 @@ function TopBar() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
 
   useEffect(() => {
     if (menuOpen && user && !userInfo) {
