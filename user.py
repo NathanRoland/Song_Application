@@ -53,9 +53,11 @@ def get_user(username: str):
 
 def create_artist_from_user(artist_id, artist_name, password, email):
     def _create_artist(session):
-        user = User(user_id = artist_id, username=artist_name, password=password, email=email, isArtist=True)
-        session.add(user)
-    
+        try:
+            user = User(user_id = artist_id, username=artist_name, password=password, email=email, isArtist=True)
+            session.add(user)
+        except Exception as e:
+            print(e)
     execute_with_retry(_create_artist)
 
 def createUser(username, password, email):

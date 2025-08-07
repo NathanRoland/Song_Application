@@ -14,7 +14,7 @@ class OnlineUser(Base):
 class User(Base):
     __tablename__ = "users"
     user_id: Mapped[str] = mapped_column(String, primary_key=True)
-    username: Mapped[str] = mapped_column(String, unique=True)
+    username: Mapped[str] = mapped_column(String)
     password: Mapped[str] = mapped_column(String)
     bio: Mapped[str] = mapped_column(String, nullable=True)
     pfp_path: Mapped[str] = mapped_column(String, nullable=True)
