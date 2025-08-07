@@ -1,4 +1,4 @@
-import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
+import React, { useState, useEffect, forwardRef, useImperativeHandle, useCallback } from 'react';
 import { useUser } from './userContext';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -12,7 +12,7 @@ const Feed = forwardRef((props, ref) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const fetchFeed = async () => {
+  const fetchFeed = useCallback(async () => {
     try {
       setLoading(true);
       const response = await axios.post(`${API_BASE_URL}/feed`, {
@@ -24,7 +24,7 @@ const Feed = forwardRef((props, ref) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
 
   // Expose fetchFeed method to parent component
   useImperativeHandle(ref, () => ({

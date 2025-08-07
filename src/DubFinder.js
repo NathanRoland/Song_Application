@@ -1,6 +1,5 @@
 import React, { useState, useRef } from "react";
 import axios from "axios";
-import { Link } from "react-router-dom";
 import { API_BASE_URL } from './config';
 import "./DubFinder.css";
 

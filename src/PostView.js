@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useUser } from "./userContext";
 import axios from "axios";
@@ -110,7 +110,7 @@ const PostView = () => {
     }
   }, [postId, fetchPost]);
 
-  const fetchPost = async () => {
+  const fetchPost = useCallback(async () => {
     try {
       setLoading(true);
       const response = await axios.post(`${API_BASE_URL}/post/view`, {
@@ -123,7 +123,7 @@ const PostView = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [postId]);
 
   const handleLikePost = async () => {
     if (!user) {

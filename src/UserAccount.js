@@ -12,8 +12,6 @@ const UserAccount = () => {
   const [error, setError] = useState(null);
   const [editForm, setEditForm] = useState({});
   const [friendRequests, setFriendRequests] = useState({ received: [], sent: [] });
-  const [friendRequestsLoading, setFriendRequestsLoading] = useState(false);
-  const [friendRequestsError, setFriendRequestsError] = useState(null);
   const [friends, setFriends] = useState([]);
 
   const fetchUserInfo = useCallback(async () => {

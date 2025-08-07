@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useUser } from './userContext';
 import axios from 'axios';
 import { API_BASE_URL } from './config';
@@ -23,7 +23,7 @@ const PostModal = ({ isOpen, onClose, postId = null, onPostCreated }) => {
     }
   }, [isOpen, postId, fetchPost]);
 
-  const fetchPost = async () => {
+  const fetchPost = useCallback(async () => {
     try {
       setLoading(true);
       const response = await axios.post(`${API_BASE_URL}/post/view`, {
@@ -35,7 +35,7 @@ const PostModal = ({ isOpen, onClose, postId = null, onPostCreated }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [postId]);
 
   const handlePhotoSelect = (e) => {
     const file = e.target.files[0];
